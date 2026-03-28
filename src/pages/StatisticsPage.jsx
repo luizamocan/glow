@@ -1,0 +1,289 @@
+import { useState, useEffect, useRef } from "react";
+import { Chart, registerables } from "chart.js";
+
+import Sidebar from "../components/Sidebar";
+import { s, AVATAR_HEADER } from "./StatisticsPage.styles";
+
+Chart.register(...registerables);
+
+const PRICE_TIERS = {
+  low:    { label: "Low (≤$40)",    max: 40,  color: "#ecdcc2" },
+  medium: { label: "Medium ($41-$80)", max: 80, color: "rgba(163,135,91,0.74)" },
+  high:   { label: "High (>$80)",   max: Infinity, color: "#f2cdcd" },
+};
+
+const getDurationBucket = (dur) => {
+  const mins = parseInt(dur);
+  if (mins <= 30) return "0-30 min";
+  if (mins <= 60) return "30-60 min";
+  return "60+ min";
+};
+
+const getPriceTier = (price) => {
+  const val = parseInt(price.replace("$", ""));
+  if (val <= 40) return "Low";
+  if (val <= 80) return "Medium";
+  return "High";
+};
+
+const getRating = (price) => {
+  const val = parseInt(price.replace("$", ""));
+  if (val <= 40) return 3;
+  if (val <= 80) return 4;
+  return 5;
+};
+
+function StarRating({ rating, max = 5 }) {
+  return (
+    <span style={{ color: "#c8a96e", fontSize: 18, letterSpacing: 2 }}>
+      {Array.from({ length: max }, (_, i) => (
+        <span key={i} style={{ color: i < rating ? "#c8a96e" : "#ddd" }}>★</span>
+      ))}
+    </span>
+  );
+}
+
+function PieChart({ services }) {
+  const canvasRef = useRef(null);
+  const chartRef = useRef(null);
+
+  useEffect(() => {
+    const counts = { low: 0, medium: 0, high: 0 };
+    services.forEach(sv => {
+      const val = parseInt(sv.price.replace("$", ""));
+      if (val <= 40) counts.low++;
+      else if (val <= 80) counts.medium++;
+      else counts.high++;
+    });
+
+    if (chartRef.current) chartRef.current.destroy();
+    if (!canvasRef.current) return;
+
+    chartRef.current = new Chart(canvasRef.current, {
+      type: "pie",
+      data: {
+        labels: ["Low (≤$40)", "Medium ($41-$80)", "High (>$80)"],
+        datasets: [{
+          data: [counts.low, counts.medium, counts.high],
+          backgroundColor: ["#ecdcc2", "rgba(163,135,91,0.74)", "#f2cdcd"],
+          borderWidth: 0,
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: "right", labels: { font: { family: "'Libre Bodoni', serif", size: 13 }, color: "#5f4a28" } },
+        },
+      },
+    });
+    return () => { if (chartRef.current) chartRef.current.destroy(); };
+  }, [services]);
+
+  return <canvas ref={canvasRef} />;
+}
+
+function DurationBarChart({ services }) {
+  const canvasRef = useRef(null);
+  const chartRef = useRef(null);
+
+  useEffect(() => {
+    const counts = { "0-30 min": 0, "30-60 min": 0, "60+ min": 0 };
+    services.forEach(sv => counts[getDurationBucket(sv.duration)]++);
+
+    if (chartRef.current) chartRef.current.destroy();
+    if (!canvasRef.current) return;
+
+    chartRef.current = new Chart(canvasRef.current, {
+      type: "bar",
+      data: {
+        labels: Object.keys(counts),
+        datasets: [{
+          data: Object.values(counts),
+          backgroundColor: ["#ecdcc2", "rgba(163,135,91,0.74)", "#f2cdcd"],
+          borderRadius: 4, borderWidth: 0,
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: "'Libre Bodoni', serif" }, color: "#5f4a28" }, grid: { color: "rgba(95,74,40,0.1)" } },
+          x: { ticks: { font: { family: "'Libre Bodoni', serif" }, color: "#5f4a28" }, grid: { display: false } },
+        },
+      },
+    });
+    return () => { if (chartRef.current) chartRef.current.destroy(); };
+  }, [services]);
+
+  return <canvas ref={canvasRef} />;
+}
+
+function FrequencyBarChart({ services }) {
+  const canvasRef = useRef(null);
+  const chartRef = useRef(null);
+
+  useEffect(() => {
+    const counts = { "Low": 0, "Medium": 0, "High": 0 };
+    services.forEach(sv => counts[getPriceTier(sv.price)]++);
+
+    if (chartRef.current) chartRef.current.destroy();
+    if (!canvasRef.current) return;
+
+    chartRef.current = new Chart(canvasRef.current, {
+      type: "bar",
+      data: {
+        labels: ["Low Price", "Medium Price", "High Price"],
+        datasets: [{
+          data: [counts.Low, counts.Medium, counts.High],
+          backgroundColor: ["#ecdcc2", "rgba(163,135,91,0.74)", "#f2cdcd"],
+          borderRadius: 4, borderWidth: 0,
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: "'Libre Bodoni', serif" }, color: "#5f4a28" }, grid: { color: "rgba(95,74,40,0.1)" } },
+          x: { ticks: { font: { family: "'Libre Bodoni', serif" }, color: "#5f4a28" }, grid: { display: false } },
+        },
+      },
+    });
+    return () => { if (chartRef.current) chartRef.current.destroy(); };
+  }, [services]);
+
+  return <canvas ref={canvasRef} />;
+}
+
+function RankingTable({ services }) {
+  const sorted = [...services]
+    .sort((a, b) => getRating(b.price) - getRating(a.price))
+    .slice(0, 5);
+
+  return (
+    <div style={{ padding: "8px 0" }}>
+      {sorted.map((sv, i) => (
+        <div key={sv.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px", borderBottom: "1px solid rgba(95,74,40,0.1)" }}>
+          <span style={{ fontFamily: "'Libre Bodoni', serif", fontSize: 18, color: "#5f4a28", fontWeight: 700 }}>
+            {i + 1}. {sv.name}
+          </span>
+          <StarRating rating={getRating(sv.price)} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TabularView({ services }) {
+  const [page, setPage] = useState(1);
+  const perPage = 5;
+  const totalPages = Math.max(1, Math.ceil(services.length / perPage));
+  const displayed = services.slice((page - 1) * perPage, page * perPage);
+
+  const tierColor = { Low: "#ecdcc2", Medium: "rgba(163,135,91,0.3)", High: "#f2cdcd" };
+
+  return (
+    <div style={s.tabularCard}>
+      <table style={s.table}>
+        <thead>
+          <tr>
+            <th style={s.th}>Service Name</th>
+            <th style={s.th}>Price Tier</th>
+            <th style={s.th}>Pricing & Duration</th>
+            <th style={s.th}>Monthly Frequency</th>
+            <th style={s.th}>Rating</th>
+          </tr>
+        </thead>
+        <tbody>
+          {displayed.map((sv) => {
+            const tier = getPriceTier(sv.price);
+            const price = parseInt(sv.price.replace("$", ""));
+            const duration = parseInt(sv.duration);
+            const freq = Math.max(5, Math.round(50 / price * 10));
+            return (
+              <tr key={sv.id}>
+                <td style={s.td}>{sv.name}</td>
+                <td style={s.td}>
+                  <span style={{ background: tierColor[tier], borderRadius: 12, padding: "2px 14px", fontFamily: "'Libre Bodoni', serif", fontSize: 14, color: "#5f4a28" }}>
+                    {tier}
+                  </span>
+                </td>
+                <td style={s.td}>{sv.price}/{duration} min</td>
+                <td style={s.td}>{freq}</td>
+                <td style={s.td}><StarRating rating={getRating(sv.price)} /></td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <div style={s.pagination}>
+        <button style={s.pageNav} onClick={() => setPage(p => Math.max(1, p - 1))}>Previous</button>
+        {Array.from({ length: totalPages }, (_, i) => (
+          <button key={i + 1} style={s.pageBtn(page === i + 1)} onClick={() => setPage(i + 1)}>{i + 1}</button>
+        ))}
+        <button style={s.pageNav} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>Next ›</button>
+      </div>
+    </div>
+  );
+}
+
+export default function StatisticsPage({ onNavigate, services, onLogout }) {
+  const [view, setView] = useState("chart");
+
+  return (
+    <div style={s.page} className="page-enter">
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Libre+Bodoni:wght@400;700&display=swap');`}</style>
+      <Sidebar activePage="statistics" onNavigate={onNavigate} onLogout={onLogout} />
+
+      <main style={s.main} className="main-content">
+        {/* Top bar */}
+        <div style={s.topBar}>
+          <div style={s.pageTitle}>Admin Dashboard</div>
+          <div style={s.userCard}>
+            <img src={AVATAR_HEADER} alt="Admin" style={s.userAvatar} />
+            <div>
+              <div style={s.userName}>Luiza Mocan</div>
+              <div style={s.userRole}>Admin</div>
+            </div>
+            <span style={{ color: "#5f4a28" }}>▾</span>
+          </div>
+        </div>
+
+        {/* Section heading */}
+        <div style={s.sectionTitle}>Statistics</div>
+
+        {/* View toggle */}
+        <div style={s.toggleRow}>
+          <button style={view === "chart" ? s.toggleActive : s.toggleInactive} className={"toggle-btn" + (view === "chart" ? " active" : "")} onClick={() => setView("chart")}>
+            📈 Chart View
+          </button>
+          <button style={view === "tabular" ? s.toggleActive : s.toggleInactive} className={"toggle-btn" + (view === "tabular" ? " active" : "")} onClick={() => setView("tabular")}>
+            📋 Tabular View
+          </button>
+        </div>
+
+        {view === "chart" ? (
+          <div style={s.chartsGrid} className="charts-grid">
+            <div style={s.chartCard} className="chart-card">
+              <div style={s.chartTitle}>Services Breakdown by Price</div>
+              <div style={{ height: 200 }}><PieChart services={services} /></div>
+            </div>
+            <div style={s.chartCard} className="chart-card">
+              <div style={s.chartTitle}>Services Breakdown by Duration</div>
+              <div style={{ height: 200 }}><DurationBarChart services={services} /></div>
+            </div>
+            <div style={s.chartCard} className="chart-card">
+              <div style={s.chartTitle}>Services Frequency</div>
+              <div style={{ height: 200 }}><FrequencyBarChart services={services} /></div>
+            </div>
+            <div style={s.chartCard} className="chart-card">
+              <div style={s.chartTitle}>Top Services Ranking</div>
+              <RankingTable services={services} />
+            </div>
+          </div>
+        ) : (
+          <TabularView services={services} />
+        )}
+      </main>
+    </div>
+  );
+}

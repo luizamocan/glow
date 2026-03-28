@@ -1,0 +1,74 @@
+import Logo from "./Logo";
+
+const ICON_HOUSE    = "https://www.figma.com/api/mcp/asset/841a4700-6fab-4663-ae97-cf92d1d68d0c";
+const ICON_CALENDAR = "https://www.figma.com/api/mcp/asset/ff48615c-6130-4851-bf6b-9e1974aadc84";
+const ICON_HISTORY  = "https://www.figma.com/api/mcp/asset/683e30fb-4434-4a47-aad1-224d4afda21e";
+const ICON_PROFILE  = "https://www.figma.com/api/mcp/asset/5a08f230-b395-43b6-8937-8616dd0a7159";
+const ICON_LOGOUT   = "https://www.figma.com/api/mcp/asset/15f619de-b365-4221-ad63-25043552e709";
+
+const s = {
+  sidebar: {
+    position: "fixed", top: 0, left: 0, width: 341, height: "100vh",
+    background: "rgba(250,243,232,0.95)", backdropFilter: "blur(10px)",
+    fontFamily: "'Libre Bodoni', serif", zIndex: 100,
+    display: "flex", flexDirection: "column",
+  },
+  logo: { display: "flex", justifyContent: "center" },
+  nav: { padding: "0 29px", marginTop: 16 },
+  navItem: (active) => ({
+    display: "flex", alignItems: "center", gap: 12,
+    padding: "11px 24px", borderRadius: 20, cursor: "pointer",
+    background: active ? "#ecdcc2" : "transparent",
+    fontWeight: 700, fontSize: 20, color: "#5f4a28",
+    marginBottom: 12, transition: "background 0.2s",
+  }),
+  icon: { width: 28, height: 28, objectFit: "contain", flexShrink: 0 },
+  bottom: {
+    margin: "auto 29px 0", background: "#ecdcc2", borderRadius: 30,
+    padding: "12px 16px", textAlign: "center", marginBottom: 20,
+  },
+  logoutRow: {
+    display: "flex", alignItems: "center", gap: 10,
+    fontWeight: 700, fontSize: 20, color: "#5f4a28", cursor: "pointer",
+  },
+  divider: { height: 1, background: "#c8b89a", margin: "10px 0" },
+  avatar: { width: 64, height: 64, borderRadius: "50%", objectFit: "cover", margin: "6px auto", display: "block" },
+  name: { fontWeight: 700, fontSize: 16, color: "#5f4a28" },
+  role: { fontSize: 13, color: "#5f4a28", opacity: 0.7 },
+};
+
+export default function ClientSidebar({ activePage, onNavigate, user, onLogout }) {
+  return (
+    <div style={s.sidebar}>
+      <div style={s.logo}><Logo size={138} /></div>
+      <nav style={s.nav}>
+        <div style={s.navItem(activePage === "client-home")} onClick={() => onNavigate("client-home")}>
+          <img src={ICON_HOUSE} alt="My Journey" style={s.icon} />
+          My Journey
+        </div>
+        <div style={s.navItem(activePage === "book")} onClick={() => onNavigate("book")}>
+          <img src={ICON_CALENDAR} alt="Book a Glow" style={s.icon} />
+          Book a Glow
+        </div>
+        <div style={s.navItem(activePage === "history")} onClick={() => onNavigate("history")}>
+          <img src={ICON_HISTORY} alt="My Glow History" style={s.icon} />
+          My Glow History
+        </div>
+        <div style={s.navItem(activePage === "profile")} onClick={() => onNavigate("profile")}>
+          <img src={ICON_PROFILE} alt="My Profile" style={s.icon} />
+          My Profile
+        </div>
+      </nav>
+      <div style={s.bottom}>
+        <div style={s.logoutRow} onClick={onLogout}>
+          <img src={ICON_LOGOUT} alt="Logout" style={s.icon} />
+          Log Out
+        </div>
+        <div style={s.divider} />
+        <img src={user?.avatar} alt={user?.name} style={s.avatar} />
+        <div style={s.name}>{user?.name}</div>
+        <div style={s.role}>Client</div>
+      </div>
+    </div>
+  );
+}
