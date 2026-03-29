@@ -9,7 +9,7 @@ const ICON_LOGOUT       = "https://www.figma.com/api/mcp/asset/15f619de-b365-422
 
 const s = {
   sidebar: {
-    position: "fixed", top: 0, left: 0, width: 341, height: "100vh",
+    position: "fixed", top: 0, left: 0, width: "var(--sidebar-w)", height: "100vh",
     background: "rgba(250,243,232,0.95)", backdropFilter: "blur(10px)",
     fontFamily: "'Libre Bodoni', serif", zIndex: 100,
     display: "flex", flexDirection: "column",

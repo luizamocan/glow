@@ -8,7 +8,7 @@ const ICON_LOGOUT   = "https://www.figma.com/api/mcp/asset/15f619de-b365-4221-ad
 
 const s = {
   sidebar: {
-    position: "fixed", top: 0, left: 0, width: 341, height: "100vh",
+    position: "fixed", top: 0, left: 0, width: "var(--sidebar-w)", height: "100vh",
     background: "rgba(250,243,232,0.95)", backdropFilter: "blur(10px)",
     fontFamily: "'Libre Bodoni', serif", zIndex: 100,
     display: "flex", flexDirection: "column",
@@ -39,31 +39,37 @@ const s = {
 
 export default function ClientSidebar({ activePage, onNavigate, user, onLogout }) {
   return (
-    <div style={s.sidebar}>
+    <div style={s.sidebar} className="sidebar-desktop">
       <div style={s.logo}><Logo size={138} /></div>
       <nav style={s.nav}>
-        <div style={s.navItem(activePage === "client-home")} onClick={() => onNavigate("client-home")}>
+
+        <div style={s.navItem(activePage === "client-home")} className={"sidebar-item" + (activePage === "client-home" ? " active" : "")} onClick={() => onNavigate("client-home")}>
           <img src={ICON_HOUSE} alt="My Journey" style={s.icon} />
           My Journey
         </div>
-        <div style={s.navItem(activePage === "book")} onClick={() => onNavigate("book")}>
+
+       <div style={s.navItem(activePage === "book")} className={"sidebar-item" + (activePage === "book" ? " active" : "")} onClick={() => onNavigate("book")}>
           <img src={ICON_CALENDAR} alt="Book a Glow" style={s.icon} />
           Book a Glow
         </div>
-        <div style={s.navItem(activePage === "history")} onClick={() => onNavigate("history")}>
+
+        <div style={s.navItem(activePage === "history")} className={"sidebar-item" + (activePage === "history" ? " active" : "")} onClick={() => onNavigate("history")}>
           <img src={ICON_HISTORY} alt="My Glow History" style={s.icon} />
           My Glow History
         </div>
-        <div style={s.navItem(activePage === "profile")} onClick={() => onNavigate("profile")}>
+
+        <div style={s.navItem(activePage === "profile")} className={"sidebar-item" + (activePage === "profile" ? " active" : "")} onClick={() => onNavigate("profile")}>
           <img src={ICON_PROFILE} alt="My Profile" style={s.icon} />
           My Profile
         </div>
       </nav>
+
       <div style={s.bottom}>
         <div style={s.logoutRow} onClick={onLogout}>
           <img src={ICON_LOGOUT} alt="Logout" style={s.icon} />
           Log Out
         </div>
+        
         <div style={s.divider} />
         <img src={user?.avatar} alt={user?.name} style={s.avatar} />
         <div style={s.name}>{user?.name}</div>

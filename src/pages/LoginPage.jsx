@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { s } from "./LoginPage.styles";
 import { loginUser, validateEmail, validatePassword } from "../auth";
+import { getLastUser } from "../cookies";
 
 export default function LoginPage({ onNavigate, onLoginSuccess }) {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(getLastUser() || "");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false); 
   const [errors, setErrors] = useState({});

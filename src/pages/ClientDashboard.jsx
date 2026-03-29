@@ -9,6 +9,8 @@ import IMG_COLLORING from "../assets/hair-coloring.jpg";
 import IMG_PEDICURE from "../assets/pedicure.jpg";
 import IMG_TREATMENT from "../assets/spa-treatment.jpg";
 import IMG_SHAPING from "../assets/eyebrow-shaping.jpg";
+import { saveMoodPreference, getMoodPreference } from "../cookies";
+
 
 const AVATAR_HEADER = "https://www.figma.com/api/mcp/asset/bd465d6d-f3c4-4f78-8407-d4c5e123bc60";
 
@@ -116,8 +118,9 @@ const s = {
   },
 };
 
+
 export default function ClientDashboard({ onNavigate, user, services, onLogout }) {
-  const [selectedMood, setSelectedMood] = useState("Relaxed");
+  const [selectedMood, setSelectedMood] = useState(getMoodPreference() || "Relaxed");
 
   const recommendedNames = MOOD_RECOMMENDATIONS[selectedMood] || [];
   const recommended = recommendedNames.map((name, i) => {
@@ -178,7 +181,10 @@ export default function ClientDashboard({ onNavigate, user, services, onLogout }
               <div key={mood.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
                 <div
                   style={s.moodCircle(selectedMood === mood.label, mood.bg)} className={"mood-circle" + (selectedMood === mood.label ? " selected" : "")}
-                  onClick={() => setSelectedMood(mood.label)}
+                  onClick={() => {
+                    setSelectedMood(mood.label);
+                    saveMoodPreference(mood.label);
+                    }}
                 >
                   <img src={mood.icon} alt={mood.label} style={s.moodIcon} />
                 </div>

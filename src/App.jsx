@@ -5,6 +5,7 @@ import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import StatisticsPage from "./pages/StatisticsPage";
 import ClientDashboard from "./pages/ClientDashboard";
+import { trackPageVisit, saveLastUser, incrementVisitCount } from "./cookies";
 
 const INITIAL_SERVICES = [
   { id: 1, name: "Facial",          price: "$50",  duration: "60 minutes",  description: "Deep skin cleansing treatment",              image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80" },
@@ -22,26 +23,34 @@ export default function App() {
   const [services, setServices] = useState(INITIAL_SERVICES);
   const [currentUser, setCurrentUser] = useState(null);
 
+
+  const navigate = (p) => {
+    trackPageVisit(p);
+    setPage(p);
+  }
+
   const handleLoginSuccess = (user) => {
     setCurrentUser(user);
-    if (user.role === "admin") setPage("services");
-    else setPage("client-home");
+    saveLastUser(user.email);
+    incrementVisitCount();
+    if (user.role === "admin") navigate("services");
+    else navigate("client-home");
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
-    setPage("home");
+    navigate("home");
   };
 
-  if (page === "login")       return <LoginPage      onNavigate={setPage} onLoginSuccess={handleLoginSuccess} />;
-  if (page === "signup")      return <SignUpPage     onNavigate={setPage} onLoginSuccess={handleLoginSuccess} />;
-  if (page === "services")    return <ServicesPage   onNavigate={setPage} services={services} setServices={setServices} onLogout={handleLogout} />;
-  if (page === "statistics")  return <StatisticsPage onNavigate={setPage} services={services} onLogout={handleLogout} />;
-  if (page === "client-home") return <ClientDashboard onNavigate={setPage} user={currentUser} services={services} onLogout={handleLogout} />;
+  if (page === "login")       return <LoginPage      onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
+  if (page === "signup")      return <SignUpPage     onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
+  if (page === "services")    return <ServicesPage   onNavigate={navigate} services={services} setServices={setServices} onLogout={handleLogout} />;
+  if (page === "statistics")  return <StatisticsPage onNavigate={navigate} services={services} onLogout={handleLogout} />;
+  if (page === "client-home") return <ClientDashboard onNavigate={navigate} user={currentUser} services={services} onLogout={handleLogout} />;
 
   return <GlowAndShine
-    onExplore={() => setPage("login")}
-    onLogin={() => setPage("login")}
-    onSignup={() => setPage("signup")}
+    onExplore={() => navigate("login")}
+    onLogin={() => navigate("login")}
+    onSignup={() => navigate("signup")}
   />;
 }

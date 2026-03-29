@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { saveLastViewedService } from "../cookies";
+
 const s = {
   overlay: {
     position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
@@ -56,6 +59,10 @@ const s = {
 };
 
 export default function ServiceDetailModal({ service, onClose, onEdit, onDelete }) {
+  useEffect(() => {
+    saveLastViewedService(service);
+  }, [service]);
+
   return (
     <div style={s.overlay} className="modal-overlay" onClick={onClose}>
       <div style={s.modal} className="modal-content" onClick={(e) => e.stopPropagation()}>
