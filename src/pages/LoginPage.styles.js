@@ -1,4 +1,4 @@
-const BG_IMAGE = "https://www.figma.com/api/mcp/asset/c5e43914-c60a-4913-9aee-2d22bd1551d8";
+const BG_IMAGE = "https://www.figma.com/api/mcp/asset/6b421ffd-3cf2-4411-838a-6b5830e7cd93";
 
 export const s = {
   page: {

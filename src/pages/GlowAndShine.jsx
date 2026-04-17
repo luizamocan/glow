@@ -1,8 +1,7 @@
 import { useState } from "react";
 import Logo from "../components/Logo";
 
-const BG_IMAGE =
-  "https://www.figma.com/api/mcp/asset/0ebdec9a-9a96-4b4d-b628-f5982ce2e172";
+const BG_IMAGE = "https://www.figma.com/api/mcp/asset/50c00380-44f9-485a-9ff2-5c656d6b35b7";
 
 export default function GlowAndShine({ onExplore, onLogin, onSignup }) {
   const [hovered, setHovered] = useState(null);

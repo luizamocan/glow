@@ -1,10 +1,7 @@
-/* ============================================
-   GLOW & SHINE — Global Animations & Responsive
-   ============================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Libre+Bodoni:ital,wght@0,400;0,700;1,400&display=swap');
 
-/* ── CSS Variables ── */
+
 :root {
   --brown:       #5f4a28;
   --cream:       #faf3e8;
@@ -18,14 +15,12 @@
   --transition:  0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── Reset ── */
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Libre Bodoni', serif; background: #fff; overflow-x: hidden; }
 img { max-width: 100%; }
 
-/* ══════════════════════════════
-   PAGE TRANSITIONS
-══════════════════════════════ */
+
 @keyframes pageEnter {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -43,9 +38,7 @@ img { max-width: 100%; }
 .page-slide   { animation: pageSlideLeft 0.4s  cubic-bezier(0.4,0,0.2,1) both; }
 .fade-in      { animation: fadeIn        0.35s ease both; }
 
-/* ══════════════════════════════
-   LANDING PAGE
-══════════════════════════════ */
+
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(28px); }
   to   { opacity: 1; transform: translateY(0); }

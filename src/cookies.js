@@ -1,6 +1,4 @@
-// ══════════════════════════════
-// Cookie utility functions
-// ══════════════════════════════
+
 
 export const setCookie = (name, value, days = 30) => {
   const expires = new Date();
@@ -21,9 +19,7 @@ export const deleteCookie = (name) => {
   document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
 };
 
-// ══════════════════════════════
-// Activity tracking functions
-// ══════════════════════════════
+
 
 export const trackPageVisit = (page) => {
   const history = getCookie('page_history') || [];
