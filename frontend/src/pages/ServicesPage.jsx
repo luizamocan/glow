@@ -7,7 +7,7 @@ import ServiceDetailModal from "../components/ServiceDetailModal";
 import Toast, { useToast } from "../components/Toast";
 import { s } from "./ServicesPage.styles";
 
-export default function ServicesPage({ onNavigate, onLogout }) {
+export default function ServicesPage({ onNavigate, onLogout, setServices: setGlobalServices }) {
   const { toast, showToast } = useToast();
   const [services, setServices] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 4, total: 0, totalPages: 1 });
@@ -20,11 +20,19 @@ export default function ServicesPage({ onNavigate, onLogout }) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
+  // --- SYNC GLOBAL STATE (for StatisticsPage) ---
+  const syncGlobalServices = useCallback(async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/services?page=1&limit=1000`);
+      const result = await res.json();
+      if (res.ok) setGlobalServices(result.data);
+    } catch (_) {}
+  }, [setGlobalServices]);
+
   // --- API CALLS ---
 
   const fetchServices = useCallback(async () => {
     try {
-      // Calling your Node.js backend with query params for Server-Side Pagination & Search
       const response = await fetch(`http://localhost:5000/api/services?page=${page}&limit=4&search=${search}`);
       const result = await response.json();
       
@@ -39,30 +47,43 @@ export default function ServicesPage({ onNavigate, onLogout }) {
     }
   }, [page, search, showToast]);
 
-  // Re-fetch whenever page or search changes
   useEffect(() => {
     fetchServices();
-  }, [fetchServices]);
+    syncGlobalServices();
+  }, [fetchServices, syncGlobalServices]);
+
+  const queueServiceAction = (action) => {
+    const queue = JSON.parse(localStorage.getItem("offline_services") || "[]");
+    queue.push(action);
+    localStorage.setItem("offline_services", JSON.stringify(queue));
+    showToast("Server unreachable. Action saved locally.", "info");
+  };
 
   const handleAdd = async (form) => {
+    const tempId = Date.now();
+    const newService = { ...form, id: tempId };
+
     try {
       const response = await fetch("http://localhost:5000/api/services", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const result = await response.json();
 
       if (response.status === 201) {
         showToast("Service added successfully!");
         setShowAdd(false);
-        fetchServices(); // Refresh list from server
+        fetchServices();
+        syncGlobalServices(); // ✅ keep StatisticsPage in sync
       } else {
-        // Show server-side validation errors
+        const result = await response.json();
         showToast(result.errors?.join(", ") || "Validation failed", "error");
       }
     } catch (err) {
-      showToast("Error connecting to server", "error");
+      queueServiceAction({ type: 'ADD_SERVICE', data: form });
+      setServices(prev => [...prev, newService]);
+      setGlobalServices(prev => [...prev, newService]); // ✅ optimistic global update
+      setShowAdd(false);
     }
   };
 
@@ -73,37 +94,42 @@ export default function ServicesPage({ onNavigate, onLogout }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const result = await response.json();
 
       if (response.ok) {
         showToast("Service updated successfully!");
         setEditTarget(null);
         fetchServices();
+        syncGlobalServices(); // ✅ keep StatisticsPage in sync
       } else {
+        const result = await response.json();
         showToast(result.errors?.join(", ") || "Update failed", "error");
       }
     } catch (err) {
-      showToast("Error connecting to server", "error");
+      queueServiceAction({ type: 'EDIT_SERVICE', data: form });
+      setServices(prev => prev.map(s => s.id === form.id ? form : s));
+      setGlobalServices(prev => prev.map(s => s.id === form.id ? form : s)); // ✅ optimistic global update
+      setEditTarget(null);
     }
   };
 
   const handleDelete = async () => {
+    const targetId = deleteTarget.id;
     try {
-      const response = await fetch(`http://localhost:5000/api/services/${deleteTarget.id}`, {
+      const response = await fetch(`http://localhost:5000/api/services/${targetId}`, {
         method: "DELETE",
       });
 
       if (response.status === 204) {
         showToast("Service deleted.", "info");
         setDeleteTarget(null);
-        // If we delete the last item on a page, go back one page
-        if (services.length === 1 && page > 1) setPage(page - 1);
-        else fetchServices();
-      } else {
-        showToast("Delete failed", "error");
+        fetchServices();
+        syncGlobalServices(); // ✅ keep StatisticsPage in sync
       }
     } catch (err) {
-      showToast("Error connecting to server", "error");
+      queueServiceAction({ type: 'DELETE_SERVICE', id: targetId });
+      setServices(prev => prev.filter(s => s.id !== targetId));
+      setGlobalServices(prev => prev.filter(s => s.id !== targetId)); // ✅ optimistic global update
+      setDeleteTarget(null);
     }
   };
 
@@ -182,7 +208,6 @@ export default function ServicesPage({ onNavigate, onLogout }) {
             </tbody>
           </table>
 
-          {/* Server-Side Pagination UI */}
           <div style={s.pagination}>
             <button 
               style={s.pageNav} 

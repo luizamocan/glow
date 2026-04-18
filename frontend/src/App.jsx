@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import GlowAndShine from "./pages/GlowAndShine";
 import ServicesPage from "./pages/ServicesPage";
 import LoginPage from "./pages/LoginPage";
@@ -50,21 +50,169 @@ export default function App() {
     navigate("home");
   };
 
-  const addAppointment = (newApp) => {
-  const appointmentWithMeta = {
+
+// Inside App.jsx
+
+const addAppointment = async (newApp) => {
+  const appointmentData = {
     ...newApp,
-    id: Date.now(),
-    status: "Upcoming",
-    userEmail: currentUser.email 
-  };
-  setAppointments([...appointments, appointmentWithMeta]);
+    id: Date.now(), // Temporary ID for offline tracking
+    price: typeof newApp.price === 'string' ? parseInt(newApp.price.replace('$', '')) : newApp.price,
+    userEmail: currentUser.email,
+    status: "Upcoming"
   };
 
-  const cancelAppointment = (id) => {
-  if (window.confirm("Are you sure you want to cancel this glow?")) {
-    setAppointments(appointments.filter(app => app.id !== id));
+  // 1. Update UI immediately (Optimistic UI)
+  setAppointments(prev => [...prev, appointmentData]);
+
+  try {
+    // 2. Attempt to send to server
+    const response = await fetch("http://localhost:5000/api/appointments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(appointmentData),
+    });
+
+    if (!response.ok) throw new Error("Server unreachable");
+    
+    console.log("Sync Successful: Appointment saved to server.");
+  } catch (error) {
+    // 3. If offline or server down, save to Local Storage
+    console.warn("Server unreachable. Saving to offline queue...");
+    
+    const offlineQueue = JSON.parse(localStorage.getItem("offline_glows") || "[]");
+    offlineQueue.push(appointmentData);
+    localStorage.setItem("offline_glows", JSON.stringify(offlineQueue));
+    
+    alert("You are offline! Your booking is saved locally and will sync when you reconnect.");
   }
 };
+
+const cancelAppointment = async (id) => {
+  if (!window.confirm("Are you sure you want to cancel this glow?")) return;
+
+  // 1. Update UI immediately
+  setAppointments(prev => prev.filter(app => app.id !== id));
+
+  if (navigator.onLine) {
+    try {
+      const response = await fetch(`http://localhost:5000/api/appointments/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Server error");
+    } catch (error) {
+      // 2. If server is down, queue the DELETE action
+      queueOfflineAction({ type: 'DELETE', id });
+    }
+  } else {
+    // 3. If offline, queue the DELETE action
+    queueOfflineAction({ type: 'DELETE', id });
+  }
+};
+
+// Helper function to manage the queue
+const queueOfflineAction = (action) => {
+  const queue = JSON.parse(localStorage.getItem("offline_glows") || "[]");
+  queue.push(action);
+  localStorage.setItem("offline_glows", JSON.stringify(queue));
+  alert("Offline: This cancellation will sync when you are back online.");
+};
+
+useEffect(() => {
+  const socket = new WebSocket("ws://localhost:5000");
+  socket.onmessage = (event) => {
+    const data=JSON.parse(event.data);
+    if(data.type === "DATA_UPDATED") {
+      console.log("Received real-time update from server");
+      setServices(prev => {
+        // Prevent duplicates if the message is received twice
+        if (prev.find(s => s.id === data.payload.id)) return prev;
+        return [...prev, data.payload];
+      });
+    }
+  };
+
+  const syncOfflineData = async () => {
+    // 1. Only attempt sync if we are actually online
+    if (!navigator.onLine) return;
+
+    // --- PART A: SYNC APPOINTMENTS (CLIENT) ---
+    const appQueue = JSON.parse(localStorage.getItem("offline_glows") || "[]");
+    
+    if (appQueue.length > 0) {
+      console.log(`Syncing ${appQueue.length} offline appointments...`);
+      for (const action of appQueue) {
+        try {
+          if (action.type === 'DELETE') {
+            await fetch(`http://localhost:5000/api/appointments/${action.id}`, {
+              method: "DELETE"
+            });
+          } else {
+            // This is a CREATE action
+            await fetch("http://localhost:5000/api/appointments", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(action),
+            });
+          }
+        } catch (err) {
+          console.error("Appointment sync failed. Server might still be unreachable.");
+          return; // Stop the loop and wait for the next 'online' event
+        }
+      }
+      localStorage.removeItem("offline_glows");
+      alert("Your offline bookings have been synchronized!");
+    }
+
+    // --- PART B: SYNC SERVICES (ADMIN) ---
+    const svcQueue = JSON.parse(localStorage.getItem("offline_services") || "[]");
+    
+    if (svcQueue.length > 0) {
+      console.log(`Syncing ${svcQueue.length} offline admin changes...`);
+      for (const action of svcQueue) {
+        try {
+          let url = "http://localhost:5000/api/services";
+          let options = { headers: { "Content-Type": "application/json" } };
+
+          if (action.type === 'ADD_SERVICE') {
+            options.method = "POST";
+            options.body = JSON.stringify(action.data);
+          } 
+          else if (action.type === 'EDIT_SERVICE') {
+            options.method = "PUT";
+            url += `/${action.data.id}`;
+            options.body = JSON.stringify(action.data);
+          } 
+          else if (action.type === 'DELETE_SERVICE') {
+            options.method = "DELETE";
+            url += `/${action.id}`;
+          }
+
+          const res = await fetch(url, options);
+          if (!res.ok) throw new Error("Sync failed");
+
+        } catch (err) {
+          console.error("Admin sync failed. Stopping batch.");
+          return; // Stop and try again later
+        }
+      }
+      localStorage.removeItem("offline_services");
+      alert("Admin service changes have been synchronized!");
+    }
+  };
+
+  // Add event listener for the browser's online status
+  window.addEventListener("online", syncOfflineData);
+
+  // Run immediately on mount in case we were already online but had a pending queue
+  syncOfflineData();
+
+  return () => {
+      window.removeEventListener("online", syncOfflineData);
+      socket.close();
+    };
+  }, []);
+
 
   if (page === "login")       return <LoginPage      onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
   if (page === "signup")      return <SignUpPage     onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
@@ -72,7 +220,7 @@ export default function App() {
   if (page === "statistics")  return <StatisticsPage onNavigate={navigate} services={services} onLogout={handleLogout} />;
   if (page === "client-home") return <ClientDashboard onNavigate={navigate} user={currentUser} services={services} onLogout={handleLogout} />;
   if (page === "book") return <BookAGlow onNavigate={navigate} user={currentUser} services={services} onLogout={handleLogout} initialService={selectedService} onBook={addAppointment} />;
-  if (page === "history") return <GlowHistory onNavigate={navigate} user={currentUser}  onLogout={handleLogout} appointments={appointments} cancelAppointment={cancelAppointment}/>;
+  if (page === "history") return <GlowHistory onNavigate={navigate} user={currentUser}  onLogout={handleLogout} appointments={appointments} setAppointments={setAppointments} cancelAppointment={cancelAppointment}/>;
   if (page === "profile") return <ProfilePage onNavigate={navigate} user={currentUser} appointments={appointments} onLogout={handleLogout} />;
   return <GlowAndShine
     onExplore={() => navigate("login")}

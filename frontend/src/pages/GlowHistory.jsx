@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ClientSidebar from "../components/ClientSidebar";
 
 const s = {
@@ -51,7 +51,24 @@ const s = {
   }
 };
 
-export default function GlowHistory({ onNavigate, user, onLogout, appointments, cancelAppointment }) {
+export default function GlowHistory({ onNavigate, user, onLogout, appointments, setAppointments, cancelAppointment }) {
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        // We pass the email as a query parameter just like your Controller expects
+        const response = await fetch(`http://localhost:5000/api/appointments?email=${user.email}`);
+        if (response.ok) {
+          const data = await response.json();
+          // Update the global state in App.jsx
+          setAppointments(data); 
+        }
+      } catch (error) {
+        console.error("Error fetching history:", error);
+      }
+    };
+
+    if (user?.email) fetchHistory();
+  }, [user.email, setAppointments]);
   // Only show appointments belonging to this client
   const myGlows = appointments.filter(app => app.userEmail === user?.email);
 

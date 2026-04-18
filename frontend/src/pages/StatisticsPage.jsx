@@ -15,7 +15,6 @@ const getDurationBucket = (dur) => {
 };
 
 const getPriceTier = (price) => {
-  // Handles both string "$50" and number 50 formats
   const val = typeof price === "string" ? parseInt(price.replace("$", "")) : price;
   if (val <= 40) return "Low";
   if (val <= 80) return "Medium";
@@ -196,7 +195,7 @@ function TabularView({ services }) {
           {displayed.map((sv) => {
             const tier = getPriceTier(sv.price);
             const price = typeof sv.price === "string" ? parseInt(sv.price.replace("$", "")) : sv.price;
-            const freq = Math.max(5, Math.round(50 / price * 10));
+            const freq = Math.max(5, Math.round(50 / (price || 1) * 10));
             return (
               <tr key={sv.id}>
                 <td style={s.td}>{sv.name}</td>
@@ -226,30 +225,41 @@ function TabularView({ services }) {
 
 // --- MAIN COMPONENT ---
 
-export default function StatisticsPage({ onNavigate, onLogout }) {
+export default function StatisticsPage({ onNavigate, onLogout, services }) {
   const [view, setView] = useState("chart");
-  const [services, setServices] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchStatsData = async () => {
-      try {
-        // Fetching all data (limit 100) to ensure charts analyze everything in RAM
-        const response = await fetch("http://localhost:5000/api/services?limit=100");
-        const result = await response.json();
-        if (response.ok) {
-          setServices(result.data);
-        }
-      } catch (err) {
-        console.error("Stats Fetch Error:", err);
-      } finally {
-        setLoading(false);
+  const handleStartGenerator = async () => {
+    try {
+      console.log("Requesting generator start...");
+      const response = await fetch("http://localhost:5000/api/admin/start-gen", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+
+      if (response.ok) {
+        alert("Generator Started!");
+      } else {
+        const err = await response.json();
+        alert("Server said: " + err.error);
       }
-    };
-    fetchStatsData();
-  }, []);
+    } catch (e) {
+      console.error("Fetch error:", e);
+      alert("Check console - server unreachable");
+    }
+  };
 
-  if (loading) return <div style={{...s.page, color: "#5f4a28", display: 'flex', alignItems: 'center', justifyContent: 'center'}}>Loading live analytics...</div>;
+  const handleStopGenerator = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/admin/stop-gen", { method: "POST" });
+      if (response.ok) alert("Faker Generator Stopped.");
+    } catch (e) {
+      alert("Error: Server unreachable.");
+    }
+  };
+
+  // Stable key based on services length — changes force chart remount,
+  // bypassing the destroy/recreate race condition on canvas refs.
+  const chartKey = services.length;
 
   return (
     <div style={s.page} className="page-enter">
@@ -270,42 +280,69 @@ export default function StatisticsPage({ onNavigate, onLogout }) {
 
         <div style={s.sectionTitle}>Business Analytics</div>
 
-        <div style={s.toggleRow}>
-          <button 
-            style={view === "chart" ? s.toggleActive : s.toggleInactive} 
-            onClick={() => setView("chart")}
-          >
-            📈 Chart View
-          </button>
-          <button 
-            style={view === "tabular" ? s.toggleActive : s.toggleInactive} 
-            onClick={() => setView("tabular")}
-          >
-            📋 Tabular View
-          </button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+          {/* View Toggle */}
+          <div style={s.toggleRow}>
+            <button
+              style={view === "chart" ? s.toggleActive : s.toggleInactive}
+              onClick={() => setView("chart")}
+            >
+              📈 Chart View
+            </button>
+            <button
+              style={view === "tabular" ? s.toggleActive : s.toggleInactive}
+              onClick={() => setView("tabular")}
+            >
+              📋 Tabular View
+            </button>
+          </div>
+
+          {/* Real-time Controls */}
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button
+              onClick={handleStartGenerator}
+              style={{ background: '#5f4a28', color: '#ffe5bd', padding: '10px 18px', borderRadius: 20, border: 'none', cursor: 'pointer', fontWeight: 700, fontFamily: "'Libre Bodoni', serif" }}
+            >
+              ▶ Start Faker
+            </button>
+            <button
+              onClick={handleStopGenerator}
+              style={{ background: '#fff', color: '#5f4a28', padding: '10px 18px', borderRadius: 20, border: '1.5px solid #5f4a28', cursor: 'pointer', fontWeight: 700, fontFamily: "'Libre Bodoni', serif" }}
+            >
+              ■ Stop Faker
+            </button>
+          </div>
         </div>
 
         {services.length === 0 ? (
           <div style={{ textAlign: "center", padding: 50, color: "#5f4a28", opacity: 0.6 }}>
-            No data available. Add services in the management tab.
+            No data available. Add services or start the Faker generator.
           </div>
         ) : view === "chart" ? (
           <div style={s.chartsGrid}>
+            {/* ✅ key={chartKey} forces full remount of each chart when services.length changes,
+                preventing the canvas ref race condition on destroy/recreate. */}
             <div style={s.chartCard}>
               <div style={s.chartTitle}>Price Tier Distribution</div>
-              <div style={{ height: 200 }}><PieChart services={services} /></div>
+              <div style={{ height: 200 }}>
+                <PieChart key={`pie-${chartKey}`} services={services} />
+              </div>
             </div>
             <div style={s.chartCard}>
               <div style={s.chartTitle}>Service Durations</div>
-              <div style={{ height: 200 }}><DurationBarChart services={services} /></div>
+              <div style={{ height: 200 }}>
+                <DurationBarChart key={`dur-${chartKey}`} services={services} />
+              </div>
             </div>
             <div style={s.chartCard}>
               <div style={s.chartTitle}>Pricing Frequency</div>
-              <div style={{ height: 200 }}><FrequencyBarChart services={services} /></div>
+              <div style={{ height: 200 }}>
+                <FrequencyBarChart key={`freq-${chartKey}`} services={services} />
+              </div>
             </div>
             <div style={s.chartCard}>
               <div style={s.chartTitle}>Top Rated Services</div>
-              <RankingTable services={services} />
+              <RankingTable key={`rank-${chartKey}`} services={services} />
             </div>
           </div>
         ) : (
