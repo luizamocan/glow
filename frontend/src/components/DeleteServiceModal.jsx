@@ -1,4 +1,4 @@
-const TRASH_IMG = "https://www.figma.com/api/mcp/asset/64ab8658-3415-4f86-8fd9-18279d3616d9";
+import  TRASH_IMG from "../assets/trash.png";
 
 const s = {
   overlay: {

@@ -1,16 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Chart, registerables } from "chart.js";
-
 import Sidebar from "../components/Sidebar";
 import { s, AVATAR_HEADER } from "./StatisticsPage.styles";
 
 Chart.register(...registerables);
 
-const PRICE_TIERS = {
-  low:    { label: "Low (≤$40)",    max: 40,  color: "#ecdcc2" },
-  medium: { label: "Medium ($41-$80)", max: 80, color: "rgba(163,135,91,0.74)" },
-  high:   { label: "High (>$80)",   max: Infinity, color: "#f2cdcd" },
-};
+// --- HELPER FUNCTIONS ---
 
 const getDurationBucket = (dur) => {
   const mins = parseInt(dur);
@@ -20,14 +15,15 @@ const getDurationBucket = (dur) => {
 };
 
 const getPriceTier = (price) => {
-  const val = parseInt(price.replace("$", ""));
+  // Handles both string "$50" and number 50 formats
+  const val = typeof price === "string" ? parseInt(price.replace("$", "")) : price;
   if (val <= 40) return "Low";
   if (val <= 80) return "Medium";
   return "High";
 };
 
 const getRating = (price) => {
-  const val = parseInt(price.replace("$", ""));
+  const val = typeof price === "string" ? parseInt(price.replace("$", "")) : price;
   if (val <= 40) return 3;
   if (val <= 80) return 4;
   return 5;
@@ -43,6 +39,8 @@ function StarRating({ rating, max = 5 }) {
   );
 }
 
+// --- CHART COMPONENTS ---
+
 function PieChart({ services }) {
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
@@ -50,9 +48,9 @@ function PieChart({ services }) {
   useEffect(() => {
     const counts = { low: 0, medium: 0, high: 0 };
     services.forEach(sv => {
-      const val = parseInt(sv.price.replace("$", ""));
-      if (val <= 40) counts.low++;
-      else if (val <= 80) counts.medium++;
+      const tier = getPriceTier(sv.price);
+      if (tier === "Low") counts.low++;
+      else if (tier === "Medium") counts.medium++;
       else counts.high++;
     });
 
@@ -70,7 +68,8 @@ function PieChart({ services }) {
         }],
       },
       options: {
-        responsive: true, maintainAspectRatio: false,
+        responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: { position: "right", labels: { font: { family: "'Libre Bodoni', serif", size: 13 }, color: "#5f4a28" } },
         },
@@ -189,15 +188,14 @@ function TabularView({ services }) {
             <th style={s.th}>Service Name</th>
             <th style={s.th}>Price Tier</th>
             <th style={s.th}>Pricing & Duration</th>
-            <th style={s.th}>Monthly Frequency</th>
+            <th style={s.th}>Frequency Index</th>
             <th style={s.th}>Rating</th>
           </tr>
         </thead>
         <tbody>
           {displayed.map((sv) => {
             const tier = getPriceTier(sv.price);
-            const price = parseInt(sv.price.replace("$", ""));
-            const duration = parseInt(sv.duration);
+            const price = typeof sv.price === "string" ? parseInt(sv.price.replace("$", "")) : sv.price;
             const freq = Math.max(5, Math.round(50 / price * 10));
             return (
               <tr key={sv.id}>
@@ -207,7 +205,7 @@ function TabularView({ services }) {
                     {tier}
                   </span>
                 </td>
-                <td style={s.td}>{sv.price}/{duration} min</td>
+                <td style={s.td}>${price} / {sv.duration} min</td>
                 <td style={s.td}>{freq}</td>
                 <td style={s.td}><StarRating rating={getRating(sv.price)} /></td>
               </tr>
@@ -216,18 +214,42 @@ function TabularView({ services }) {
         </tbody>
       </table>
       <div style={s.pagination}>
-        <button style={s.pageNav} onClick={() => setPage(p => Math.max(1, p - 1))}>Previous</button>
+        <button style={s.pageNav} disabled={page === 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Previous</button>
         {Array.from({ length: totalPages }, (_, i) => (
           <button key={i + 1} style={s.pageBtn(page === i + 1)} onClick={() => setPage(i + 1)}>{i + 1}</button>
         ))}
-        <button style={s.pageNav} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>Next ›</button>
+        <button style={s.pageNav} disabled={page === totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>Next ›</button>
       </div>
     </div>
   );
 }
 
-export default function StatisticsPage({ onNavigate, services, onLogout }) {
+// --- MAIN COMPONENT ---
+
+export default function StatisticsPage({ onNavigate, onLogout }) {
   const [view, setView] = useState("chart");
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStatsData = async () => {
+      try {
+        // Fetching all data (limit 100) to ensure charts analyze everything in RAM
+        const response = await fetch("http://localhost:5000/api/services?limit=100");
+        const result = await response.json();
+        if (response.ok) {
+          setServices(result.data);
+        }
+      } catch (err) {
+        console.error("Stats Fetch Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStatsData();
+  }, []);
+
+  if (loading) return <div style={{...s.page, color: "#5f4a28", display: 'flex', alignItems: 'center', justifyContent: 'center'}}>Loading live analytics...</div>;
 
   return (
     <div style={s.page} className="page-enter">
@@ -235,7 +257,6 @@ export default function StatisticsPage({ onNavigate, services, onLogout }) {
       <Sidebar activePage="statistics" onNavigate={onNavigate} onLogout={onLogout} />
 
       <main style={s.main} className="main-content">
-        {/* Top bar */}
         <div style={s.topBar}>
           <div style={s.pageTitle}>Admin Dashboard</div>
           <div style={s.userCard}>
@@ -244,39 +265,46 @@ export default function StatisticsPage({ onNavigate, services, onLogout }) {
               <div style={s.userName}>Luiza Mocan</div>
               <div style={s.userRole}>Admin</div>
             </div>
-            <span style={{ color: "#5f4a28" }}>▾</span>
           </div>
         </div>
 
-        {/* Section heading */}
-        <div style={s.sectionTitle}>Statistics</div>
+        <div style={s.sectionTitle}>Business Analytics</div>
 
-        {/* View toggle */}
         <div style={s.toggleRow}>
-          <button style={view === "chart" ? s.toggleActive : s.toggleInactive} className={"toggle-btn" + (view === "chart" ? " active" : "")} onClick={() => setView("chart")}>
+          <button 
+            style={view === "chart" ? s.toggleActive : s.toggleInactive} 
+            onClick={() => setView("chart")}
+          >
             📈 Chart View
           </button>
-          <button style={view === "tabular" ? s.toggleActive : s.toggleInactive} className={"toggle-btn" + (view === "tabular" ? " active" : "")} onClick={() => setView("tabular")}>
+          <button 
+            style={view === "tabular" ? s.toggleActive : s.toggleInactive} 
+            onClick={() => setView("tabular")}
+          >
             📋 Tabular View
           </button>
         </div>
 
-        {view === "chart" ? (
-          <div style={s.chartsGrid} className="charts-grid">
-            <div style={s.chartCard} className="chart-card">
-              <div style={s.chartTitle}>Services Breakdown by Price</div>
+        {services.length === 0 ? (
+          <div style={{ textAlign: "center", padding: 50, color: "#5f4a28", opacity: 0.6 }}>
+            No data available. Add services in the management tab.
+          </div>
+        ) : view === "chart" ? (
+          <div style={s.chartsGrid}>
+            <div style={s.chartCard}>
+              <div style={s.chartTitle}>Price Tier Distribution</div>
               <div style={{ height: 200 }}><PieChart services={services} /></div>
             </div>
-            <div style={s.chartCard} className="chart-card">
-              <div style={s.chartTitle}>Services Breakdown by Duration</div>
+            <div style={s.chartCard}>
+              <div style={s.chartTitle}>Service Durations</div>
               <div style={{ height: 200 }}><DurationBarChart services={services} /></div>
             </div>
-            <div style={s.chartCard} className="chart-card">
-              <div style={s.chartTitle}>Services Frequency</div>
+            <div style={s.chartCard}>
+              <div style={s.chartTitle}>Pricing Frequency</div>
               <div style={{ height: 200 }}><FrequencyBarChart services={services} /></div>
             </div>
-            <div style={s.chartCard} className="chart-card">
-              <div style={s.chartTitle}>Top Services Ranking</div>
+            <div style={s.chartCard}>
+              <div style={s.chartTitle}>Top Rated Services</div>
               <RankingTable services={services} />
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import plus from "../assets/plus.png";
 
 const s = {
   overlay: {
@@ -9,7 +10,23 @@ const s = {
     background: "#d9d9d9", borderRadius: 20, padding: "40px 48px",
     width: 520, fontFamily: "'Libre Bodoni', serif",
   },
-  title: { fontSize: 30, fontWeight: 400, color: "#5f4a28", marginBottom: 28 },
+  titleRow: { 
+    display: "flex", 
+    alignItems: "center", 
+    gap: 12, 
+    marginBottom: 28 
+  },
+  titleIcon: { 
+    width: 28, 
+    height: 28, 
+    objectFit: "contain" 
+  },
+  titleText: { 
+    fontSize: 30, 
+    fontWeight: 400, 
+    color: "#5f4a28", 
+    margin: 0 
+  },
   label: { fontSize: 20, fontWeight: 400, color: "#5f4a28", marginBottom: 6, display: "block" },
   input: {
     width: "100%", height: 36, borderRadius: 20, border: "none",
@@ -43,7 +60,7 @@ const s = {
   },
 };
 
-export default function AddServiceModal({ onClose, onAdd, services }) {
+export default function AddServiceModal({ onClose, onAdd }) {
   const [form, setForm] = useState({ name: "", price: "", duration: "", description: "" });
   const [errors, setErrors] = useState({});
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
@@ -51,49 +68,46 @@ export default function AddServiceModal({ onClose, onAdd, services }) {
   const validate = () => {
     const newErrors = {};
 
-    // Name
     if (!form.name.trim()) newErrors.name = "Service name is required";
     else if (!/^[a-zA-Z\s]+$/.test(form.name.trim())) newErrors.name = "Service name must contain only letters";
     else if (form.name.trim().length < 3) newErrors.name = "Service name must be at least 3 characters";
-    else if (form.name.trim().length > 50) newErrors.name = "Service name must be under 50 characters";
-    else if (services.some(sv => sv.name.toLowerCase() === form.name.trim().toLowerCase()))
-      newErrors.name = "A service with this name already exists";
 
-    // Price
-    const rawPrice = form.price.replace("$", "").trim();
+    const rawPrice = form.price.toString().replace("$", "").trim();
     if (!rawPrice) newErrors.price = "Price is required";
     else if (!/^\d+$/.test(rawPrice) || Number(rawPrice) <= 0) newErrors.price = "Price must be a positive whole number";
-    else if (Number(rawPrice) > 10000) newErrors.price = "Price cannot exceed $10,000";
 
-    // Duration
-    const rawDuration = form.duration.replace("minutes", "").trim();
+    const rawDuration = form.duration.toString().toLowerCase().replace("minutes", "").trim();
     if (!rawDuration) newErrors.duration = "Duration is required";
     else if (!/^\d+$/.test(rawDuration) || Number(rawDuration) <= 0) newErrors.duration = "Duration must be a positive whole number";
-    else if (Number(rawDuration) > 480) newErrors.duration = "Duration cannot exceed 480 minutes (8 hours)";
-
-    // Description
-    if (form.description.trim().length > 200) newErrors.description = "Description cannot exceed 200 characters";
 
     return newErrors;
   };
 
   const handleAdd = () => {
     const newErrors = validate();
-    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     const cleanedForm = {
-      ...form,
-      price: "$" + form.price.replace("$", "").trim(),
-      duration: form.duration.replace("minutes", "").trim() + " minutes",
+      name: form.name.trim(),
+      price: parseInt(form.price.toString().replace("$", "").trim()),
+      duration: parseInt(form.duration.toString().toLowerCase().replace("minutes", "").trim()),
       description: form.description.trim(),
     };
+
     onAdd(cleanedForm);
-    onClose();
   };
 
   return (
     <div style={s.overlay} className="modal-overlay" onClick={onClose}>
       <div style={s.modal} className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div style={s.title}>➕ Add New Service</div>
+        
+        <div style={s.titleRow}>
+          <img src={plus} alt="Add Icon" style={s.titleIcon} />
+          <h3 style={s.titleText}>Add New Service</h3>
+        </div>
 
         <label style={s.label}>Service Name</label>
         <input
@@ -104,21 +118,21 @@ export default function AddServiceModal({ onClose, onAdd, services }) {
         />
         {errors.name && <div style={s.errorText}>{errors.name}</div>}
 
-        <label style={s.label}>Price</label>
+        <label style={s.label}>Price ($)</label>
         <input
           style={errors.price ? s.inputError : s.input}
           value={form.price}
           onChange={set("price")}
-          placeholder="e.g. 50"
+          placeholder="50"
         />
         {errors.price && <div style={s.errorText}>{errors.price}</div>}
 
-        <label style={s.label}>Duration</label>
+        <label style={s.label}>Duration (min)</label>
         <input
           style={errors.duration ? s.inputError : s.input}
           value={form.duration}
           onChange={set("duration")}
-          placeholder="e.g. 60"
+          placeholder="60"
         />
         {errors.duration && <div style={s.errorText}>{errors.duration}</div>}
 
@@ -127,13 +141,13 @@ export default function AddServiceModal({ onClose, onAdd, services }) {
           style={errors.description ? s.textareaError : s.textarea}
           value={form.description}
           onChange={set("description")}
-          placeholder="Brief description... (optional)"
+          placeholder="Brief description..."
         />
         {errors.description && <div style={s.errorText}>{errors.description}</div>}
 
         <div style={s.footer}>
           <button style={s.btnCancel} onClick={onClose}>Cancel</button>
-          <button style={s.btnAdd} onClick={handleAdd}>Add</button>
+          <button style={s.btnAdd} onClick={handleAdd}>Add Service</button>
         </div>
       </div>
     </div>

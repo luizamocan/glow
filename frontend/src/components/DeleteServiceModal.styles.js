@@ -1,5 +1,3 @@
-export const TRASH_IMG = "https://www.figma.com/api/mcp/asset/64ab8658-3415-4f86-8fd9-18279d3616d9";
-
 export const s = {
   overlay: {
     position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)",

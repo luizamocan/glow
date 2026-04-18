@@ -1,4 +1,4 @@
-const BG_IMAGE = "https://www.figma.com/api/mcp/asset/6b421ffd-3cf2-4411-838a-6b5830e7cd93";
+import loginPhoto from "../assets/login_option.jpg";
 
 export const s = {
   page: {
@@ -7,7 +7,7 @@ export const s = {
   },
   left: {
     width: 654, minHeight: "100vh", flexShrink: 0,
-    backgroundImage: `url(${BG_IMAGE})`,
+    backgroundImage: `url(${loginPhoto})`,
     backgroundSize: "cover", backgroundPosition: "center",
   },
   right: {

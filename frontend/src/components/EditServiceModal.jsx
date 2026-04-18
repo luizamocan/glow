@@ -1,4 +1,6 @@
 import { useState } from "react";
+// 1. Import the local edit icon
+import editIcon from "../assets/edit.png"; 
 
 const s = {
   overlay: {
@@ -9,7 +11,24 @@ const s = {
     background: "#d9d9d9", borderRadius: 20, padding: "40px 48px",
     width: 520, fontFamily: "'Libre Bodoni', serif",
   },
-  title: { fontSize: 30, fontWeight: 400, color: "#5f4a28", marginBottom: 28 },
+  // 2. Updated Title Row layout
+  titleRow: { 
+    display: "flex", 
+    alignItems: "center", 
+    gap: 12, 
+    marginBottom: 28 
+  },
+  titleIcon: { 
+    width: 28, 
+    height: 28, 
+    objectFit: "contain" 
+  },
+  titleText: { 
+    fontSize: 30, 
+    fontWeight: 400, 
+    color: "#5f4a28", 
+    margin: 0 
+  },
   label: { fontSize: 20, fontWeight: 400, color: "#5f4a28", marginBottom: 6, display: "block" },
   input: {
     width: "100%", height: 36, borderRadius: 20, border: "none",
@@ -43,57 +62,59 @@ const s = {
   },
 };
 
-export default function EditServiceModal({ service, onClose, onSave, services }) {
-  const [form, setForm] = useState({ ...service });
+export default function EditServiceModal({ service, onClose, onSave }) {
+  const [form, setForm] = useState({ 
+    ...service,
+    price: service.price.toString().replace("$", "").trim(),
+    duration: service.duration.toString().toLowerCase().replace("minutes", "").replace("min", "").trim()
+  });
   const [errors, setErrors] = useState({});
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
   const validate = () => {
     const newErrors = {};
 
-    // Name
     if (!form.name.trim()) newErrors.name = "Service name is required";
-    else if (!/^[a-zA-Z\s]+$/.test(form.name.trim())) newErrors.name = "Service name must contain only letters";
-    else if (form.name.trim().length < 3) newErrors.name = "Service name must be at least 3 characters";
-    else if (form.name.trim().length > 50) newErrors.name = "Service name must be under 50 characters";
-    else if (services.some(sv => sv.name.toLowerCase() === form.name.trim().toLowerCase() && sv.id !== form.id))
-      newErrors.name = "A service with this name already exists";
+    else if (form.name.trim().length < 3) newErrors.name = "Name must be at least 3 characters";
 
-    // Price
-    const rawPrice = form.price.replace("$", "").trim();
-    if (!rawPrice) newErrors.price = "Price is required";
-    else if (!/^\d+$/.test(rawPrice) || Number(rawPrice) <= 0) newErrors.price = "Price must be a positive whole number";
-    else if (Number(rawPrice) > 10000) newErrors.price = "Price cannot exceed $10,000";
+    const rawPrice = form.price.toString().replace("$", "").trim();
+    if (!rawPrice || isNaN(rawPrice) || Number(rawPrice) <= 0) 
+      newErrors.price = "Price must be a positive number";
 
-    // Duration
-    const rawDuration = form.duration.replace("minutes", "").trim();
-    if (!rawDuration) newErrors.duration = "Duration is required";
-    else if (!/^\d+$/.test(rawDuration) || Number(rawDuration) <= 0) newErrors.duration = "Duration must be a positive whole number";
-    else if (Number(rawDuration) > 480) newErrors.duration = "Duration cannot exceed 480 minutes (8 hours)";
-
-    // Description
-    if (form.description.trim().length > 200) newErrors.description = "Description cannot exceed 200 characters";
+    const rawDuration = form.duration.toString().toLowerCase().replace("minutes", "").trim();
+    if (!rawDuration || isNaN(rawDuration) || Number(rawDuration) <= 0) 
+      newErrors.duration = "Duration must be a positive number";
 
     return newErrors;
   };
 
   const handleSave = () => {
     const newErrors = validate();
-    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+    if (Object.keys(newErrors).length > 0) { 
+      setErrors(newErrors); 
+      return; 
+    }
+
     const cleanedForm = {
       ...form,
-      price: "$" + form.price.replace("$", "").trim(),
-      duration: form.duration.replace("minutes", "").trim() + " minutes",
-      description: form.description.trim(),
+      name: form.name.trim(),
+      price: parseInt(form.price.toString().replace("$", "").trim()),
+      duration: parseInt(form.duration.toString().toLowerCase().replace("minutes", "").trim()),
+      description: (form.description || "").trim(),
     };
+
     onSave(cleanedForm);
-    onClose();
   };
 
   return (
     <div style={s.overlay} className="modal-overlay" onClick={onClose}>
       <div style={s.modal} className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div style={s.title}>✏️ Edit Service</div>
+        
+        {/* 3. Render the Title with Image */}
+        <div style={s.titleRow}>
+          <img src={editIcon} alt="Edit Icon" style={s.titleIcon} />
+          <h3 style={s.titleText}>Edit Service</h3>
+        </div>
 
         <label style={s.label}>Service Name</label>
         <input
@@ -103,7 +124,7 @@ export default function EditServiceModal({ service, onClose, onSave, services })
         />
         {errors.name && <div style={s.errorText}>{errors.name}</div>}
 
-        <label style={s.label}>Price</label>
+        <label style={s.label}>Price ($)</label>
         <input
           style={errors.price ? s.inputError : s.input}
           value={form.price}
@@ -111,7 +132,7 @@ export default function EditServiceModal({ service, onClose, onSave, services })
         />
         {errors.price && <div style={s.errorText}>{errors.price}</div>}
 
-        <label style={s.label}>Duration</label>
+        <label style={s.label}>Duration (min)</label>
         <input
           style={errors.duration ? s.inputError : s.input}
           value={form.duration}
@@ -129,7 +150,7 @@ export default function EditServiceModal({ service, onClose, onSave, services })
 
         <div style={s.footer}>
           <button style={s.btnCancel} onClick={onClose}>Cancel</button>
-          <button style={s.btnEdit} onClick={handleSave}>Edit</button>
+          <button style={s.btnEdit} onClick={handleSave}>Save Changes</button>
         </div>
       </div>
     </div>

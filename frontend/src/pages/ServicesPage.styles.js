@@ -1,4 +1,5 @@
-export const AVATAR_HEADER = "https://www.figma.com/api/mcp/asset/75e77366-d72b-489b-b204-cb2b3a0095d6";
+import avatarFile from "../assets/client.jpg"; 
+export const AVATAR_HEADER = avatarFile;
 export const s = {
   page: { display: "flex", minHeight: "100vh", background: "#fff", fontFamily: "'Libre Bodoni', serif" },
   main: { marginLeft: 341, flex: 1, padding: "0 40px 40px" },

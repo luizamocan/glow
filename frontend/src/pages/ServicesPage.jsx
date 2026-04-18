@@ -1,39 +1,110 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Sidebar from "../components/Sidebar";
 import AddServiceModal from "../components/AddServiceModal";
 import EditServiceModal from "../components/EditServiceModal";
 import DeleteServiceModal from "../components/DeleteServiceModal";
 import ServiceDetailModal from "../components/ServiceDetailModal";
 import Toast, { useToast } from "../components/Toast";
-import { s, AVATAR_HEADER } from "./ServicesPage.styles";
+import { s } from "./ServicesPage.styles";
 
-export default function ServicesPage({ onNavigate, services, setServices, onLogout }) {
+export default function ServicesPage({ onNavigate, onLogout }) {
   const { toast, showToast } = useToast();
+  const [services, setServices] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, limit: 4, total: 0, totalPages: 1 });
+  
   const [showAdd, setShowAdd] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [detailTarget, setDetailTarget] = useState(null);
+  
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
-  const filtered = services.filter(sv =>
-    sv.name.toLowerCase().includes(search.toLowerCase())
-  );
-  const perPage = 4;
-  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
-  const displayed = filtered.slice((page - 1) * perPage, page * perPage);
+  // --- API CALLS ---
 
-  const handleAdd = (form) => {
-    setServices([...services, { ...form, id: Date.now() }]);
-    showToast("Service added successfully!");
+  const fetchServices = useCallback(async () => {
+    try {
+      // Calling your Node.js backend with query params for Server-Side Pagination & Search
+      const response = await fetch(`http://localhost:5000/api/services?page=${page}&limit=4&search=${search}`);
+      const result = await response.json();
+      
+      if (response.ok) {
+        setServices(result.data);
+        setPagination(result.pagination);
+      } else {
+        showToast(result.error || "Failed to fetch services", "error");
+      }
+    } catch (err) {
+      showToast("Backend server is not reachable", "error");
+    }
+  }, [page, search, showToast]);
+
+  // Re-fetch whenever page or search changes
+  useEffect(() => {
+    fetchServices();
+  }, [fetchServices]);
+
+  const handleAdd = async (form) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/services", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const result = await response.json();
+
+      if (response.status === 201) {
+        showToast("Service added successfully!");
+        setShowAdd(false);
+        fetchServices(); // Refresh list from server
+      } else {
+        // Show server-side validation errors
+        showToast(result.errors?.join(", ") || "Validation failed", "error");
+      }
+    } catch (err) {
+      showToast("Error connecting to server", "error");
+    }
   };
-  const handleEdit = (form) => {
-    setServices(services.map(sv => sv.id === form.id ? form : sv));
-    showToast("Service updated successfully!");
+
+  const handleEdit = async (form) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/services/${form.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const result = await response.json();
+
+      if (response.ok) {
+        showToast("Service updated successfully!");
+        setEditTarget(null);
+        fetchServices();
+      } else {
+        showToast(result.errors?.join(", ") || "Update failed", "error");
+      }
+    } catch (err) {
+      showToast("Error connecting to server", "error");
+    }
   };
-  const handleDelete = () => {
-    setServices(services.filter(sv => sv.id !== deleteTarget.id));
-    showToast("Service deleted.", "info");
+
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/services/${deleteTarget.id}`, {
+        method: "DELETE",
+      });
+
+      if (response.status === 204) {
+        showToast("Service deleted.", "info");
+        setDeleteTarget(null);
+        // If we delete the last item on a page, go back one page
+        if (services.length === 1 && page > 1) setPage(page - 1);
+        else fetchServices();
+      } else {
+        showToast("Delete failed", "error");
+      }
+    } catch (err) {
+      showToast("Error connecting to server", "error");
+    }
   };
 
   return (
@@ -70,19 +141,17 @@ export default function ServicesPage({ onNavigate, services, setServices, onLogo
           </div>
         </div>
 
-        {/* Section heading */}
         <div style={s.sectionRow}>
           <div style={s.sectionTitle}>Services Management</div>
           <button style={s.addBtn} onClick={() => setShowAdd(true)}>＋ Add Service</button>
         </div>
 
-        {/* Table card */}
         <div style={s.tableCard}>
           <div style={s.tableTop}>
             <span style={s.tableLabel}>Services</span>
             <input
               style={s.searchBox}
-              placeholder="Search"
+              placeholder="Search server-side..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             />
@@ -98,11 +167,11 @@ export default function ServicesPage({ onNavigate, services, setServices, onLogo
               </tr>
             </thead>
             <tbody>
-              {displayed.map(sv => (
+              {services.map(sv => (
                 <tr key={sv.id} className="table-row">
                   <td style={s.td}>{sv.name}</td>
-                  <td style={s.td}>{sv.price}</td>
-                  <td style={s.td}>{sv.duration}</td>
+                  <td style={s.td}>${sv.price}</td>
+                  <td style={s.td}>{sv.duration} min</td>
                   <td style={s.tdActions}>
                     <button style={s.editBtn} onClick={() => setEditTarget(sv)}>Edit</button>
                     <button style={s.deleteBtn} onClick={() => setDeleteTarget(sv)}>Delete</button>
@@ -113,23 +182,72 @@ export default function ServicesPage({ onNavigate, services, setServices, onLogo
             </tbody>
           </table>
 
-          {/* Pagination */}
+          {/* Server-Side Pagination UI */}
           <div style={s.pagination}>
-            <button style={s.pageNav} onClick={() => setPage(p => Math.max(1, p - 1))}>Previous</button>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button key={i + 1} style={s.pageBtn(page === i + 1)} onClick={() => setPage(i + 1)}>{i + 1}</button>
+            <button 
+              style={s.pageNav} 
+              disabled={page === 1}
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+            >
+              Previous
+            </button>
+            
+            {Array.from({ length: pagination.totalPages }, (_, i) => (
+              <button 
+                key={i + 1} 
+                style={s.pageBtn(page === i + 1)} 
+                onClick={() => setPage(i + 1)}
+              >
+                {i + 1}
+              </button>
             ))}
-            <button style={s.pageNav} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>Next ›</button>
+            
+            <button 
+              style={s.pageNav} 
+              disabled={page === pagination.totalPages}
+              onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
+            >
+              Next ›
+            </button>
           </div>
-          <div style={s.showing}>Showing {displayed.length} of {filtered.length} services</div>
+          <div style={s.showing}>
+            Showing {services.length} of {pagination.total} total services
+          </div>
         </div>
       </main>
 
       <Toast message={toast?.message} type={toast?.type} />
-      {showAdd && <AddServiceModal onClose={() => setShowAdd(false)} onAdd={handleAdd} services={services} />}
-      {editTarget && <EditServiceModal onClose={() => setEditTarget(null)} service={editTarget} onSave={handleEdit} services={services} />}
-      {deleteTarget && <DeleteServiceModal onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} />}
-      {detailTarget && <ServiceDetailModal service={detailTarget} onClose={() => setDetailTarget(null)} onEdit={(sv) => { setDetailTarget(null); setEditTarget(sv); }} onDelete={(sv) => { setDetailTarget(null); setDeleteTarget(sv); }} />}
+      
+      {showAdd && (
+        <AddServiceModal 
+          onClose={() => setShowAdd(false)} 
+          onAdd={handleAdd} 
+        />
+      )}
+      
+      {editTarget && (
+        <EditServiceModal 
+          onClose={() => setEditTarget(null)} 
+          service={editTarget} 
+          onSave={handleEdit} 
+        />
+      )}
+      
+      {deleteTarget && (
+        <DeleteServiceModal 
+          onClose={() => setDeleteTarget(null)} 
+          onConfirm={handleDelete} 
+        />
+      )}
+      
+      {detailTarget && (
+        <ServiceDetailModal 
+          service={detailTarget} 
+          onClose={() => setDetailTarget(null)} 
+          onEdit={(sv) => { setDetailTarget(null); setEditTarget(sv); }} 
+          onDelete={(sv) => { setDetailTarget(null); setDeleteTarget(sv); }} 
+        />
+      )}
     </div>
   );
 }

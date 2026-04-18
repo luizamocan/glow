@@ -12,13 +12,11 @@ import IMG_SHAPING from "../assets/eyebrow-shaping.jpg";
 import { saveMoodPreference, getMoodPreference } from "../cookies";
 
 
-const AVATAR_HEADER = "https://www.figma.com/api/mcp/asset/bd465d6d-f3c4-4f78-8407-d4c5e123bc60";
 
-
-const ICON_RAIN    = "https://www.figma.com/api/mcp/asset/81b8ae32-cb62-4f3a-bab7-d57e9132f7d4";
-const ICON_LEAF    = "https://www.figma.com/api/mcp/asset/ee68658d-611b-427f-9f91-9c5285ba79ff";
-const ICON_THUNDER = "https://www.figma.com/api/mcp/asset/99b4bb60-7b16-44a1-b0b5-ea7afa6955b3";
-const ICON_STAR    = "https://www.figma.com/api/mcp/asset/c963f101-f9b2-4e56-983d-b0387e6d664b";
+import ICON_RAIN from "../assets/rain.png";
+import ICON_LEAF from  "../assets/leaf.png";
+import  ICON_THUNDER from "../assets/lightning-bolt.png";
+import  ICON_STAR from "../assets/star.png";
 
 
 // Mood → recommended services mapping
@@ -93,7 +91,7 @@ const s = {
     transform: active ? "scale(1.08)" : "scale(1)",
     boxShadow: active ? "0 4px 12px rgba(95,74,40,0.3)" : "none",
   }),
-  moodIcon: { width: 44, height: 44, objectFit: "contain" },
+  moodIcon: { width: 50, height: 50, objectFit: "contain"},
   moodLabel: { fontSize: 16, fontWeight: 700, color: "#000", textAlign: "center" },
   servicesRow: { display: "flex", gap: 16, flexWrap: "wrap" },
   serviceCard: (isBest) => ({
@@ -207,7 +205,12 @@ export default function ClientDashboard({ onNavigate, user, services, onLogout }
                 <div style={{ textAlign: "center", margin: "4px 0" }}>
                   <StarRating rating={getRating(sv.name)} />
                 </div>
-                <button style={s.bookBtn}>Book now!</button>
+                <button 
+                  style={s.bookBtn} 
+                  onClick={() => onNavigate("book", sv)} 
+                >
+                  Book now!
+                </button>
               </div>
             ))}
           </div>

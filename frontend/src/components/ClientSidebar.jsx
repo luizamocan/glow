@@ -1,10 +1,10 @@
 import Logo from "./Logo";
+import  ICON_LOGOUT from "../assets/logout.png";
+import  ICON_HOUSE from "../assets/house.png";
+import  ICON_CALENDAR from "../assets/appointment.png";
+import  ICON_PROFILE from "../assets/profile.png";
+import  ICON_HISTORY from "../assets/history.png";
 
-const ICON_HOUSE    = "https://www.figma.com/api/mcp/asset/841a4700-6fab-4663-ae97-cf92d1d68d0c";
-const ICON_CALENDAR = "https://www.figma.com/api/mcp/asset/ff48615c-6130-4851-bf6b-9e1974aadc84";
-const ICON_HISTORY  = "https://www.figma.com/api/mcp/asset/683e30fb-4434-4a47-aad1-224d4afda21e";
-const ICON_PROFILE  = "https://www.figma.com/api/mcp/asset/5a08f230-b395-43b6-8937-8616dd0a7159";
-const ICON_LOGOUT   = "https://www.figma.com/api/mcp/asset/15f619de-b365-4221-ad63-25043552e709";
 
 const s = {
   sidebar: {

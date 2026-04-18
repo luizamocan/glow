@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Logo from "../components/Logo";
 
-const BG_IMAGE = "https://www.figma.com/api/mcp/asset/50c00380-44f9-485a-9ff2-5c656d6b35b7";
+import presentationView from "../assets/presentation-view.jpg";
 
 export default function GlowAndShine({ onExplore, onLogin, onSignup }) {
   const [hovered, setHovered] = useState(null);
@@ -65,7 +65,7 @@ export default function GlowAndShine({ onExplore, onLogin, onSignup }) {
 
       {/* ── Background image ── */}
       <img
-        src={BG_IMAGE}
+        src={presentationView}
         alt="Glow & Shine background"
         style={{
           position: "absolute",

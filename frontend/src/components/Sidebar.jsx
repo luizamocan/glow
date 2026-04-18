@@ -1,11 +1,12 @@
 import Logo from "./Logo";
 
-const AVATAR_IMG = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80";
-const ICON_DASHBOARD    = "https://www.figma.com/api/mcp/asset/841a4700-6fab-4663-ae97-cf92d1d68d0c";
-const ICON_APPOINTMENTS = "https://www.figma.com/api/mcp/asset/c12c7a28-0cb2-4617-8b9f-53bc2734bc46";
-const ICON_SERVICES     = "https://www.figma.com/api/mcp/asset/549ac03e-f1a5-4771-b837-a7d28ebbeb2a";
-const ICON_STATISTICS   = "https://www.figma.com/api/mcp/asset/1bc0e4f6-db64-45ad-97f6-5da3df8f88f0";
-const ICON_LOGOUT       = "https://www.figma.com/api/mcp/asset/15f619de-b365-4221-ad63-25043552e709";
+
+import  ICON_DASHBOARD from "../assets/dashboard.png";
+import  ICON_APPOINTMENTS from "../assets/calendar.png";
+import  ICON_SERVICES from "../assets/services.png";
+import  ICON_STATISTICS from "../assets/statistics.png";
+import  ICON_LOGOUT from "../assets/logout.png";
+import AVATAR_IMG from "../assets/client.jpg"; 
 
 const s = {
   sidebar: {

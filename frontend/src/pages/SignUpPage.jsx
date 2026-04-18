@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { s } from "./SignUpPage.styles";
-import { registerUser, validateEmail, validatePassword, USERS } from "../auth";
+import { registerUser, validateEmail, validatePassword, USERS } from "../components/auth";
 
 export default function SignUpPage({ onNavigate, onLoginSuccess }) {
   const [form, setForm] = useState({ name: "", phone: "", email: "", password: "", confirm: "" });

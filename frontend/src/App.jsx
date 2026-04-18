@@ -6,6 +6,9 @@ import SignUpPage from "./pages/SignUpPage";
 import StatisticsPage from "./pages/StatisticsPage";
 import ClientDashboard from "./pages/ClientDashboard";
 import { trackPageVisit, saveLastUser, incrementVisitCount } from "./cookies";
+import BookAGlow from "./pages/BookAGlow"; 
+import GlowHistory from "./pages/GlowHistory";
+import ProfilePage from "./pages/ProfilePage";
 
 const INITIAL_SERVICES = [
   { id: 1, name: "Facial",          price: "$50",  duration: "60 minutes",  description: "Deep skin cleansing treatment",              image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80" },
@@ -18,14 +21,19 @@ const INITIAL_SERVICES = [
   { id: 8, name: "Deep Massage",    price: "$70",  duration: "75 minutes",  description: "Relaxing full body deep tissue massage",     image: "https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=400&q=80" },
 ];
 
+
 export default function App() {
   const [page, setPage] = useState("home");
   const [services, setServices] = useState(INITIAL_SERVICES);
   const [currentUser, setCurrentUser] = useState(null);
+  const [selectedService, setSelectedService] = useState(null);
+  const [appointments, setAppointments] = useState([
+  { id: 1, service: "Manicure", date: "2024-03-10", time: "11:15 AM", price: "$30", status: "Completed", rating: 5, userEmail: "client@test.com" },
+]);
 
-
-  const navigate = (p) => {
+  const navigate = (p,data = null) => {
     trackPageVisit(p);
+    if (data) setSelectedService(data);
     setPage(p);
   }
 
@@ -42,12 +50,30 @@ export default function App() {
     navigate("home");
   };
 
+  const addAppointment = (newApp) => {
+  const appointmentWithMeta = {
+    ...newApp,
+    id: Date.now(),
+    status: "Upcoming",
+    userEmail: currentUser.email 
+  };
+  setAppointments([...appointments, appointmentWithMeta]);
+  };
+
+  const cancelAppointment = (id) => {
+  if (window.confirm("Are you sure you want to cancel this glow?")) {
+    setAppointments(appointments.filter(app => app.id !== id));
+  }
+};
+
   if (page === "login")       return <LoginPage      onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
   if (page === "signup")      return <SignUpPage     onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
   if (page === "services")    return <ServicesPage   onNavigate={navigate} services={services} setServices={setServices} onLogout={handleLogout} />;
   if (page === "statistics")  return <StatisticsPage onNavigate={navigate} services={services} onLogout={handleLogout} />;
   if (page === "client-home") return <ClientDashboard onNavigate={navigate} user={currentUser} services={services} onLogout={handleLogout} />;
-
+  if (page === "book") return <BookAGlow onNavigate={navigate} user={currentUser} services={services} onLogout={handleLogout} initialService={selectedService} onBook={addAppointment} />;
+  if (page === "history") return <GlowHistory onNavigate={navigate} user={currentUser}  onLogout={handleLogout} appointments={appointments} cancelAppointment={cancelAppointment}/>;
+  if (page === "profile") return <ProfilePage onNavigate={navigate} user={currentUser} appointments={appointments} onLogout={handleLogout} />;
   return <GlowAndShine
     onExplore={() => navigate("login")}
     onLogin={() => navigate("login")}

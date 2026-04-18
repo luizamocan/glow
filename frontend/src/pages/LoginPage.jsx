@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { s } from "./LoginPage.styles";
-import { loginUser, validateEmail, validatePassword } from "../auth";
+import { loginUser, validateEmail, validatePassword } from "../components/auth";
 import { getLastUser } from "../cookies";
 
 export default function LoginPage({ onNavigate, onLoginSuccess }) {
