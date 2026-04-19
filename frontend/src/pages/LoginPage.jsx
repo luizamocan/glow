@@ -76,7 +76,6 @@ export default function LoginPage({ onNavigate, onLoginSuccess }) {
         />
         {errorText("password")}
 
-        {/* The new Tick Box for showing the password */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, marginBottom: 16 }}>
           <input
             type="checkbox"

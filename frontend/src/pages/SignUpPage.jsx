@@ -24,7 +24,6 @@ export default function SignUpPage({ onNavigate, onLoginSuccess }) {
     if (!form.password.trim()) newErrors.password = "Password is required";
     else {
       const pwErrors = validatePassword(form.password);
-      // This will automatically show the red text with the exact rules they missed!
       if (pwErrors.length > 0) newErrors.password = "Password must contain " + pwErrors.join(", ");
     }
     
@@ -76,7 +75,6 @@ export default function SignUpPage({ onNavigate, onLoginSuccess }) {
           value={form.password}
           onChange={set("password")}
         />
-        {/* The red error message will inject right here if the password fails validation */}
         {errorText("password")}
 
         <label style={s.label}>Confirm Password</label>

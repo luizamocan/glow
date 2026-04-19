@@ -3,7 +3,6 @@ const { validateAppointment } = require("../validators/appointmentValidator");
 
 const getAppointments = (req, res) => {
   const email = req.query.email;
-  // If email is provided, filter by user; otherwise, get all (for admin)
   const data = email ? store.getByEmail(email) : store.getAll();
   res.json(data);
 };

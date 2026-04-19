@@ -7,10 +7,10 @@ export default function ProfilePage({ onNavigate, user, appointments, onLogout }
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
-    phone: "+1 (555) 000-0000" // Mock data
+    phone: "+4074568223" 
   });
 
-  // Calculate real stats from the appointments array
+
   const totalGlows = appointments.filter(a => a.status === "Completed").length;
   const upcomingGlows = appointments.filter(a => a.status === "Upcoming").length;
 
@@ -26,7 +26,6 @@ export default function ProfilePage({ onNavigate, user, appointments, onLogout }
       <main style={s.main}>
         <div style={s.container}>
           
-          {/* LEFT: Identity Card */}
           <div style={s.sideCard}>
             <img src={user?.avatar} alt="Profile" style={s.avatar} />
             <h2 style={{ color: "#5f4a28", margin: "0 0 5px" }}>{formData.name}</h2>
@@ -36,10 +35,9 @@ export default function ProfilePage({ onNavigate, user, appointments, onLogout }
             </button>
           </div>
 
-          {/* RIGHT: Stats & Info */}
+
           <div style={s.contentArea}>
             
-            {/* Stats Summary */}
             <div style={s.statsRow}>
               <div style={s.statBox}>
                 <div style={{ fontSize: 32, fontWeight: 700, color: "#5f4a28" }}>{totalGlows}</div>
@@ -55,7 +53,6 @@ export default function ProfilePage({ onNavigate, user, appointments, onLogout }
               </div>
             </div>
 
-            {/* Personal Info Card */}
             <div style={s.infoCard}>
               <h3 style={{ marginBottom: 20 }}>Personal Information</h3>
               
@@ -74,7 +71,6 @@ export default function ProfilePage({ onNavigate, user, appointments, onLogout }
               )}
             </div>
 
-            {/* Beauty Preferences Placeholder */}
             <div style={{...s.infoCard, background: "#faf3e8", border: "1px solid #ecdcc2"}}>
               <h3 style={{ marginBottom: 15 }}>Beauty Passport</h3>
               <p style={{ opacity: 0.8 }}>Skin Type: Sensitive • Hair Type: Straight</p>

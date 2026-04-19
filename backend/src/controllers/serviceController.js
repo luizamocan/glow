@@ -9,14 +9,13 @@ const getAllServices = (req, res) => {
 
   let services = store.getAll();
 
-  // Filter by search
   if (search) {
     services = services.filter(s =>
       s.name.toLowerCase().includes(search)
     );
   }
 
-  // Pagination
+ 
   const total      = services.length;
   const totalPages = Math.max(1, Math.ceil(total / limit));
   const start      = (page - 1) * limit;
@@ -44,7 +43,7 @@ const createService = (req, res) => {
   const errors = validateService(req.body);
   if (errors.length > 0) return res.status(400).json({ errors });
 
-  // Check duplicate name
+
   const exists = store.getAll().find(
     s => s.name.toLowerCase() === req.body.name.trim().toLowerCase()
   );
@@ -71,7 +70,7 @@ const updateService = (req, res) => {
   const errors = validateService(req.body, true);
   if (errors.length > 0) return res.status(400).json({ errors });
 
-  // Check duplicate name (exclude current)
+ 
   if (req.body.name) {
     const duplicate = store.getAll().find(
       s => s.name.toLowerCase() === req.body.name.trim().toLowerCase() && s.id !== id

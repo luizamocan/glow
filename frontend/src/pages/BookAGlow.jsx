@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ClientSidebar from "../components/ClientSidebar";
 
-
-// Asset Imports
 import IMG_MASSAGE from "../assets/massage.jpg";
 import IMG_FACIAL from "../assets/facial.jpg";
 import IMG_MANICURE from "../assets/manicure.jpg";
@@ -88,7 +86,7 @@ function StarRating({ rating = 5 }) {
   );
 }
 
-// Helper to generate times every 15 minutes (9:00 AM to 8:00 PM)
+
 const generateTimes = () => {
   const times = [];
   for (let hour = 9; hour <= 20; hour++) {
@@ -97,7 +95,7 @@ const generateTimes = () => {
       const ampm = hour >= 12 ? 'PM' : 'AM';
       const m = min === 0 ? '00' : min;
       times.push(`${h}:${m} ${ampm}`);
-      if (hour === 20) break; // Stop at 8:00 PM exactly
+      if (hour === 20) break; 
     }
   }
   return times;
@@ -107,7 +105,6 @@ export default function BookAGlow({ onNavigate, user, services, onLogout, initia
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("All");
   
-  // Modal States
   const [bookingService, setBookingService] = useState(null);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -174,14 +171,13 @@ export default function BookAGlow({ onNavigate, user, services, onLogout, initia
               <div style={s.cardContent}>
                 <h3 style={s.cardName}>{sv.name}</h3>
                 <StarRating />
-                <div style={s.cardPrice}>{sv.price} • {sv.duration}</div>
+                <div style={s.cardPrice}>${sv.price} • {sv.duration} min</div>
                 <button style={s.bookBtn} onClick={() => setBookingService(sv)}>Book Appointment</button>
               </div>
             </div>
           ))}
         </div>
 
-        {/* --- BOOKING MODAL --- */}
         {bookingService && (
           <div style={s.overlay} onClick={() => setBookingService(null)}>
             <div style={s.modal} onClick={e => e.stopPropagation()}>
@@ -193,7 +189,7 @@ export default function BookAGlow({ onNavigate, user, services, onLogout, initia
                 style={s.input} 
                 value={date} 
                 onChange={e => setDate(e.target.value)} 
-                min={new Date().toISOString().split("T")[0]} // Prevents booking in the past
+                min={new Date().toISOString().split("T")[0]} 
               />
               
               <label style={{display:'block', marginBottom: 5, color: '#5f4a28', fontWeight: 700}}>Select Time</label>

@@ -51,22 +51,21 @@ export default function App() {
   };
 
 
-// Inside App.jsx
 
 const addAppointment = async (newApp) => {
   const appointmentData = {
     ...newApp,
-    id: Date.now(), // Temporary ID for offline tracking
+    id: Date.now(), 
     price: typeof newApp.price === 'string' ? parseInt(newApp.price.replace('$', '')) : newApp.price,
     userEmail: currentUser.email,
     status: "Upcoming"
   };
 
-  // 1. Update UI immediately (Optimistic UI)
+
   setAppointments(prev => [...prev, appointmentData]);
 
   try {
-    // 2. Attempt to send to server
+   
     const response = await fetch("http://localhost:5000/api/appointments", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -77,7 +76,6 @@ const addAppointment = async (newApp) => {
     
     console.log("Sync Successful: Appointment saved to server.");
   } catch (error) {
-    // 3. If offline or server down, save to Local Storage
     console.warn("Server unreachable. Saving to offline queue...");
     
     const offlineQueue = JSON.parse(localStorage.getItem("offline_glows") || "[]");
@@ -91,7 +89,7 @@ const addAppointment = async (newApp) => {
 const cancelAppointment = async (id) => {
   if (!window.confirm("Are you sure you want to cancel this glow?")) return;
 
-  // 1. Update UI immediately
+
   setAppointments(prev => prev.filter(app => app.id !== id));
 
   if (navigator.onLine) {
@@ -101,22 +99,34 @@ const cancelAppointment = async (id) => {
       });
       if (!response.ok) throw new Error("Server error");
     } catch (error) {
-      // 2. If server is down, queue the DELETE action
       queueOfflineAction({ type: 'DELETE', id });
     }
   } else {
-    // 3. If offline, queue the DELETE action
     queueOfflineAction({ type: 'DELETE', id });
   }
 };
 
-// Helper function to manage the queue
+
 const queueOfflineAction = (action) => {
   const queue = JSON.parse(localStorage.getItem("offline_glows") || "[]");
   queue.push(action);
   localStorage.setItem("offline_glows", JSON.stringify(queue));
   alert("Offline: This cancellation will sync when you are back online.");
 };
+useEffect(() => {
+  const loadInitialServices = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/services?page=1&limit=1000");
+      const result = await res.json();
+      if (res.ok && result.data?.length > 0) {
+        setServices(result.data);
+      }
+    } catch (_) {
+      // server unreachable, keep INITIAL_SERVICES as fallback
+    }
+  };
+  loadInitialServices();
+}, []);
 
 useEffect(() => {
   const socket = new WebSocket("ws://localhost:5000");
@@ -125,7 +135,6 @@ useEffect(() => {
     if(data.type === "DATA_UPDATED") {
       console.log("Received real-time update from server");
       setServices(prev => {
-        // Prevent duplicates if the message is received twice
         if (prev.find(s => s.id === data.payload.id)) return prev;
         return [...prev, data.payload];
       });
@@ -133,10 +142,8 @@ useEffect(() => {
   };
 
   const syncOfflineData = async () => {
-    // 1. Only attempt sync if we are actually online
     if (!navigator.onLine) return;
 
-    // --- PART A: SYNC APPOINTMENTS (CLIENT) ---
     const appQueue = JSON.parse(localStorage.getItem("offline_glows") || "[]");
     
     if (appQueue.length > 0) {
@@ -148,7 +155,6 @@ useEffect(() => {
               method: "DELETE"
             });
           } else {
-            // This is a CREATE action
             await fetch("http://localhost:5000/api/appointments", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -157,14 +163,14 @@ useEffect(() => {
           }
         } catch (err) {
           console.error("Appointment sync failed. Server might still be unreachable.");
-          return; // Stop the loop and wait for the next 'online' event
+          return; 
         }
       }
       localStorage.removeItem("offline_glows");
       alert("Your offline bookings have been synchronized!");
     }
 
-    // --- PART B: SYNC SERVICES (ADMIN) ---
+  
     const svcQueue = JSON.parse(localStorage.getItem("offline_services") || "[]");
     
     if (svcQueue.length > 0) {
@@ -193,7 +199,7 @@ useEffect(() => {
 
         } catch (err) {
           console.error("Admin sync failed. Stopping batch.");
-          return; // Stop and try again later
+          return; 
         }
       }
       localStorage.removeItem("offline_services");
@@ -201,10 +207,8 @@ useEffect(() => {
     }
   };
 
-  // Add event listener for the browser's online status
+ 
   window.addEventListener("online", syncOfflineData);
-
-  // Run immediately on mount in case we were already online but had a pending queue
   syncOfflineData();
 
   return () => {

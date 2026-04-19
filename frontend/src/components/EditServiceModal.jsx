@@ -11,7 +11,6 @@ const s = {
     background: "#d9d9d9", borderRadius: 20, padding: "40px 48px",
     width: 520, fontFamily: "'Libre Bodoni', serif",
   },
-  // 2. Updated Title Row layout
   titleRow: { 
     display: "flex", 
     alignItems: "center", 
@@ -110,7 +109,6 @@ export default function EditServiceModal({ service, onClose, onSave }) {
     <div style={s.overlay} className="modal-overlay" onClick={onClose}>
       <div style={s.modal} className="modal-content" onClick={(e) => e.stopPropagation()}>
         
-        {/* 3. Render the Title with Image */}
         <div style={s.titleRow}>
           <img src={editIcon} alt="Edit Icon" style={s.titleIcon} />
           <h3 style={s.titleText}>Edit Service</h3>

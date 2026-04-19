@@ -19,7 +19,6 @@ import  ICON_THUNDER from "../assets/lightning-bolt.png";
 import  ICON_STAR from "../assets/star.png";
 
 
-// Mood → recommended services mapping
 const MOOD_RECOMMENDATIONS = {
   Tired:        ["Deep Massage", "Spa Treatment", "Facial", "Pedicure"],
   Relaxed:      ["Manicure", "Eyebrow Shaping", "Haircut", "Pedicure"],
@@ -168,12 +167,10 @@ export default function ClientDashboard({ onNavigate, user, services, onLogout }
           </div>
         </div>
 
-        {/* Glow Selector card */}
         <div style={s.card}>
           <div style={s.moodTitle}>Glow Selector: The Mood-Based Treatment Recommender</div>
           <div style={s.moodSubtitle}>How is your spirit today?</div>
 
-          {/* Mood buttons */}
           <div style={s.moodsRow}>
             {MOODS.map(mood => (
               <div key={mood.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
@@ -191,7 +188,7 @@ export default function ClientDashboard({ onNavigate, user, services, onLogout }
             ))}
           </div>
 
-          {/* Recommended services */}
+  
           <div style={s.servicesRow}>
             {recommended.map((sv, i) => (
               <div key={sv.id} style={s.serviceCard(i === 0)} className="service-card-hover">

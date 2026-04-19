@@ -5,7 +5,7 @@ import { s, AVATAR_HEADER } from "./StatisticsPage.styles";
 
 Chart.register(...registerables);
 
-// --- HELPER FUNCTIONS ---
+
 
 const getDurationBucket = (dur) => {
   const mins = parseInt(dur);
@@ -38,7 +38,6 @@ function StarRating({ rating, max = 5 }) {
   );
 }
 
-// --- CHART COMPONENTS ---
 
 function PieChart({ services }) {
   const canvasRef = useRef(null);
@@ -223,9 +222,10 @@ function TabularView({ services }) {
   );
 }
 
-// --- MAIN COMPONENT ---
+
 
 export default function StatisticsPage({ onNavigate, onLogout, services }) {
+  console.log("StatisticsPage received services:", services);
   const [view, setView] = useState("chart");
 
   const handleStartGenerator = async () => {
@@ -257,8 +257,7 @@ export default function StatisticsPage({ onNavigate, onLogout, services }) {
     }
   };
 
-  // Stable key based on services length — changes force chart remount,
-  // bypassing the destroy/recreate race condition on canvas refs.
+  
   const chartKey = services.length;
 
   return (
@@ -281,7 +280,6 @@ export default function StatisticsPage({ onNavigate, onLogout, services }) {
         <div style={s.sectionTitle}>Business Analytics</div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          {/* View Toggle */}
           <div style={s.toggleRow}>
             <button
               style={view === "chart" ? s.toggleActive : s.toggleInactive}
@@ -297,7 +295,6 @@ export default function StatisticsPage({ onNavigate, onLogout, services }) {
             </button>
           </div>
 
-          {/* Real-time Controls */}
           <div style={{ display: 'flex', gap: 12 }}>
             <button
               onClick={handleStartGenerator}

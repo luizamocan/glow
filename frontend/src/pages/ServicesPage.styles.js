@@ -4,7 +4,7 @@ export const s = {
   page: { display: "flex", minHeight: "100vh", background: "#fff", fontFamily: "'Libre Bodoni', serif" },
   main: { marginLeft: 341, flex: 1, padding: "0 40px 40px" },
 
-  // Top bar
+
   topBar: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 0 0", borderBottom: "1px solid #e0d5c5", marginBottom: 28 },
   pageTitle: { fontSize: 36, fontWeight: 700, color: "#5f4a28" },
   userCard: { display: "flex", alignItems: "center", gap: 12, background: "#ecdcc2", borderRadius: 20, padding: "8px 20px" },
@@ -12,7 +12,7 @@ export const s = {
   userName: { fontWeight: 700, fontSize: 18, color: "#5f4a28" },
   userRole: { fontSize: 14, color: "#5f4a28", opacity: 0.7 },
 
-  // Section header
+
   sectionRow: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 },
   sectionTitle: { fontSize: 28, fontWeight: 700, color: "#5f4a28" },
   addBtn: {
@@ -22,7 +22,7 @@ export const s = {
     color: "#5f4a28", cursor: "pointer", transition: "background 0.2s",
   },
 
-  // Table card
+
   tableCard: { background: "#faf3e8", borderRadius: 25, padding: "20px 24px" },
   tableTop: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 },
   tableLabel: { fontSize: 26, fontWeight: 400, color: "#5f4a28" },
@@ -32,7 +32,7 @@ export const s = {
     width: 180, outline: "none",
   },
 
-  // Table
+
   table: { width: "100%", borderCollapse: "collapse" },
   th: { textAlign: "left", fontSize: 18, fontWeight: 400, color: "#5f4a28", padding: "8px 12px", borderBottom: "1px solid #c8b89a" },
   td: { fontSize: 16, color: "rgba(95,74,40,0.8)", padding: "12px 12px", borderBottom: "1px solid #e0d5c5" },
@@ -50,7 +50,7 @@ export const s = {
     cursor: "pointer",
   },
 
-  // Pagination
+ 
   pagination: { display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "20px 0 8px" },
   pageBtn: (active) => ({
     width: 36, height: 32, borderRadius: 10, border: "none", cursor: "pointer",

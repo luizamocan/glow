@@ -67,11 +67,9 @@ export default function ServiceDetailModal({ service, onClose, onEdit, onDelete 
     <div style={s.overlay} className="modal-overlay" onClick={onClose}>
       <div style={s.modal} className="modal-content" onClick={(e) => e.stopPropagation()}>
 
-        {/* Service image */}
         {service.image && (
           <img src={service.image} alt={service.name} style={{ width: "100%", height: 140, objectFit: "cover", borderRadius: "32px 32px 0 0" }} />
         )}
-        {/* Header */}
         <div style={s.header}>
           <div style={s.headerLeft}>
             <span style={s.badge}>SERVICE DETAILS</span>
@@ -80,10 +78,9 @@ export default function ServiceDetailModal({ service, onClose, onEdit, onDelete 
           <button style={s.closeBtn} onClick={onClose}>✕</button>
         </div>
 
-        {/* Body */}
+
         <div style={s.body}>
 
-          {/* Price + Duration cards */}
           <div style={s.statsRow}>
             <div style={s.statCard}>
               <div style={s.statLabel}>Price</div>
@@ -95,7 +92,6 @@ export default function ServiceDetailModal({ service, onClose, onEdit, onDelete 
             </div>
           </div>
 
-          {/* Description */}
           <div style={s.descSection}>
             <div style={s.descLabel}>Description</div>
             <p style={s.descText}>
@@ -105,7 +101,6 @@ export default function ServiceDetailModal({ service, onClose, onEdit, onDelete 
 
           <div style={s.divider} />
 
-          {/* Action buttons */}
           <div style={s.footer}>
             <button style={s.editBtn} onClick={() => { onEdit(service); onClose(); }}>
               Edit Service

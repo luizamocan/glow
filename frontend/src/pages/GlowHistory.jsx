@@ -55,11 +55,9 @@ export default function GlowHistory({ onNavigate, user, onLogout, appointments, 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        // We pass the email as a query parameter just like your Controller expects
         const response = await fetch(`http://localhost:5000/api/appointments?email=${user.email}`);
         if (response.ok) {
           const data = await response.json();
-          // Update the global state in App.jsx
           setAppointments(data); 
         }
       } catch (error) {
@@ -69,9 +67,8 @@ export default function GlowHistory({ onNavigate, user, onLogout, appointments, 
 
     if (user?.email) fetchHistory();
   }, [user.email, setAppointments]);
-  // Only show appointments belonging to this client
-  const myGlows = appointments.filter(app => app.userEmail === user?.email);
 
+  const myGlows = appointments.filter(app => app.userEmail === user?.email);
   const futureGlows = myGlows.filter(app => app.status === "Upcoming");
   const pastGlows = myGlows.filter(app => app.status === "Completed");
 
@@ -85,7 +82,6 @@ export default function GlowHistory({ onNavigate, user, onLogout, appointments, 
           <p style={s.subtitle}>Review your past transformations and look forward to your next shine.</p>
         </header>
 
-        {/* --- FUTURE SECTION --- */}
         <section>
           <h2 style={s.sectionTitle}>Upcoming Glows</h2>
           <div style={s.list}>
@@ -98,7 +94,6 @@ export default function GlowHistory({ onNavigate, user, onLogout, appointments, 
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
                   <div style={{fontWeight: 700, color: "#5f4a28", marginBottom: 4}}>{app.price}</div>
                   <div style={s.badge(true)}>Confirmed</div>
-                  {/* Cancel Button */}
                   <button 
                     style={s.cancelBtn} 
                     onClick={() => cancelAppointment(app.id)}
@@ -111,7 +106,6 @@ export default function GlowHistory({ onNavigate, user, onLogout, appointments, 
           </div>
         </section>
 
-        {/* --- PAST SECTION --- */}
         <section>
           <h2 style={s.sectionTitle}>Past Glows</h2>
           <div style={s.list}>

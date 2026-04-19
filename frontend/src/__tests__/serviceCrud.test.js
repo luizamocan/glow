@@ -5,7 +5,6 @@ const INITIAL_SERVICES = [
   { id: 4, name: "Spa Treatment", price: "$100", duration: "120 minutes", description: "Full body spa" },
 ];
 
-// Simulate the CRUD handlers from ServicesPage
 const handleAdd = (services, form) => [
   ...services,
   { ...form, id: Date.now() }

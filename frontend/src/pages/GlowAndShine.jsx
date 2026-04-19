@@ -16,7 +16,6 @@ export default function GlowAndShine({ onExplore, onLogin, onSignup }) {
         fontFamily: "'Libre Bodoni', serif",
       }}
     >
-      {/* ── Google Font import ── */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Libre+Bodoni:ital,wght@0,400;0,700;1,400&display=swap');
 
@@ -63,7 +62,6 @@ export default function GlowAndShine({ onExplore, onLogin, onSignup }) {
         }
       `}</style>
 
-      {/* ── Background image ── */}
       <img
         src={presentationView}
         alt="Glow & Shine background"
@@ -77,7 +75,7 @@ export default function GlowAndShine({ onExplore, onLogin, onSignup }) {
         }}
       />
 
-      {/* ── Top-left logo ── */}
+
       <div
         style={{ position: "absolute", top: 16, left: 24 }}
         className="fade-up-1 logo-float"
@@ -85,7 +83,6 @@ export default function GlowAndShine({ onExplore, onLogin, onSignup }) {
         <Logo size={100} />
       </div>
 
-      {/* ── Top-right nav buttons ── */}
       <div
         className="nav-buttons"
         style={{
@@ -112,13 +109,12 @@ export default function GlowAndShine({ onExplore, onLogin, onSignup }) {
         </button>
       </div>
 
-      {/* ── Frosted-glass card ── */}
       <div
         className="glass-card"
         style={{
           position: "absolute",
           top: 115,
-          left: "calc(50% - 346px)",  /* centers the 693px card on 1440px canvas */
+          left: "calc(50% - 346px)",  
           width: 693,
           height: 694,
           borderRadius: 105,
@@ -135,7 +131,6 @@ export default function GlowAndShine({ onExplore, onLogin, onSignup }) {
           textAlign: "center",
         }}
       >
-        {/* Title */}
         <h1
           className="title fade-up-2"
           style={{
@@ -149,7 +144,6 @@ export default function GlowAndShine({ onExplore, onLogin, onSignup }) {
           Glow &amp; Shine
         </h1>
 
-        {/* Tagline */}
         <h2
           className="subtitle fade-up-3"
           style={{
@@ -163,7 +157,6 @@ export default function GlowAndShine({ onExplore, onLogin, onSignup }) {
           Timeless Beauty, Modern Touch
         </h2>
 
-        {/* Body copy */}
         <p
           className="body-text fade-up-3"
           style={{
@@ -179,7 +172,6 @@ export default function GlowAndShine({ onExplore, onLogin, onSignup }) {
           and book appointments in just a few clicks.
         </p>
 
-        {/* CTA button */}
         <button
           className="btn cta-btn fade-up-4"
           style={{ width: 293, height: 45, fontSize: 24 }}

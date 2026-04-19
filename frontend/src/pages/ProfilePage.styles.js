@@ -4,14 +4,14 @@ export const s = {
   
   container: { display: "flex", gap: "30px", alignItems: "flex-start" },
   
-  // Left Side: Identity Card
+
   sideCard: { 
     flex: "0 0 300px", background: "#faf3e8", borderRadius: 25, 
     padding: "30px", border: "1px solid #5f4a28", textAlign: "center" 
   },
   avatar: { width: 120, height: 120, borderRadius: "50%", objectFit: "cover", marginBottom: 15, border: "3px solid #5f4a28" },
   
-  // Right Side: Details & Stats
+
   contentArea: { flex: 1, display: "flex", flexDirection: "column", gap: "25px" },
   
   infoCard: { background: "#ecdcc2", borderRadius: 25, padding: "30px", color: "#5f4a28" },

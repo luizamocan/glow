@@ -8,6 +8,7 @@ import Toast, { useToast } from "../components/Toast";
 import { s } from "./ServicesPage.styles";
 
 export default function ServicesPage({ onNavigate, onLogout, setServices: setGlobalServices }) {
+  console.log("setGlobalServices is:", setGlobalServices);
   const { toast, showToast } = useToast();
   const [services, setServices] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 4, total: 0, totalPages: 1 });
@@ -20,16 +21,21 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
-  // --- SYNC GLOBAL STATE (for StatisticsPage) ---
-  const syncGlobalServices = useCallback(async () => {
-    try {
-      const res = await fetch(`http://localhost:5000/api/services?page=1&limit=1000`);
-      const result = await res.json();
-      if (res.ok) setGlobalServices(result.data);
-    } catch (_) {}
-  }, [setGlobalServices]);
 
-  // --- API CALLS ---
+ const syncGlobalServices = useCallback(async () => {
+  try {
+    const res = await fetch(`http://localhost:5000/api/services?page=1&limit=1000`);
+    const result = await res.json();
+    console.log("syncGlobalServices result:", result); 
+    if (res.ok) {
+      console.log("Setting global services:", result.data); 
+      setGlobalServices(result.data);
+    }
+  } catch (e) {
+    console.error("syncGlobalServices failed:", e); 
+  }
+}, [setGlobalServices]);
+
 
   const fetchServices = useCallback(async () => {
     try {
@@ -74,7 +80,7 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
         showToast("Service added successfully!");
         setShowAdd(false);
         fetchServices();
-        syncGlobalServices(); // ✅ keep StatisticsPage in sync
+        syncGlobalServices(); 
       } else {
         const result = await response.json();
         showToast(result.errors?.join(", ") || "Validation failed", "error");
@@ -82,7 +88,7 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
     } catch (err) {
       queueServiceAction({ type: 'ADD_SERVICE', data: form });
       setServices(prev => [...prev, newService]);
-      setGlobalServices(prev => [...prev, newService]); // ✅ optimistic global update
+      setGlobalServices(prev => [...prev, newService]); 
       setShowAdd(false);
     }
   };
@@ -99,7 +105,7 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
         showToast("Service updated successfully!");
         setEditTarget(null);
         fetchServices();
-        syncGlobalServices(); // ✅ keep StatisticsPage in sync
+        syncGlobalServices(); 
       } else {
         const result = await response.json();
         showToast(result.errors?.join(", ") || "Update failed", "error");
@@ -107,7 +113,7 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
     } catch (err) {
       queueServiceAction({ type: 'EDIT_SERVICE', data: form });
       setServices(prev => prev.map(s => s.id === form.id ? form : s));
-      setGlobalServices(prev => prev.map(s => s.id === form.id ? form : s)); // ✅ optimistic global update
+      setGlobalServices(prev => prev.map(s => s.id === form.id ? form : s)); 
       setEditTarget(null);
     }
   };
@@ -123,12 +129,12 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
         showToast("Service deleted.", "info");
         setDeleteTarget(null);
         fetchServices();
-        syncGlobalServices(); // ✅ keep StatisticsPage in sync
+        syncGlobalServices(); 
       }
     } catch (err) {
       queueServiceAction({ type: 'DELETE_SERVICE', id: targetId });
       setServices(prev => prev.filter(s => s.id !== targetId));
-      setGlobalServices(prev => prev.filter(s => s.id !== targetId)); // ✅ optimistic global update
+      setGlobalServices(prev => prev.filter(s => s.id !== targetId)); 
       setDeleteTarget(null);
     }
   };

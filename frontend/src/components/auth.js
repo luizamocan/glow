@@ -20,8 +20,7 @@ const DEFAULT_USERS = [
   },
 ];
 
-// 1. Check if we already have saved users in localStorage. 
-// If we do, parse them. If we don't, use the DEFAULT_USERS.
+
 const savedUsers = localStorage.getItem("glow_users");
 export const USERS = savedUsers ? JSON.parse(savedUsers) : DEFAULT_USERS;
 
@@ -33,7 +32,6 @@ export const loginUser = (email, password) => {
 };
 
 export const registerUser = (name, email, password) => {
-  // Any new signup becomes a client
   const newUser = {
     id: Date.now(),
     email,
@@ -43,10 +41,8 @@ export const registerUser = (name, email, password) => {
     avatar: NEW_CLIENT,
   };
   
-  // Add the new user to our current array
+
   USERS.push(newUser);
-  
-  // 2. Save the newly updated array back into localStorage!
   localStorage.setItem("glow_users", JSON.stringify(USERS));
   
   return newUser;

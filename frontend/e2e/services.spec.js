@@ -24,9 +24,7 @@ async function loginAsClient(page) {
   await expect(page.locator('text=YOUR SIGNATURE SHINE IS WAITING').first()).toBeVisible({ timeout: 10000 });
 }
 
-// ══════════════════════════════
-// FEATURE 1: Authentication
-// ══════════════════════════════
+
 test.describe('Authentication', () => {
 
   test('admin can log in and reaches services dashboard', async ({ page }) => {
@@ -79,9 +77,7 @@ test.describe('Authentication', () => {
 
 });
 
-// ══════════════════════════════
-// FEATURE 2: CRUD Operations
-// ══════════════════════════════
+
 test.describe('Services CRUD', () => {
 
   test.beforeEach(async ({ page }) => {
@@ -153,9 +149,7 @@ test.describe('Services CRUD', () => {
 
 });
 
-// ══════════════════════════════
-// FEATURE 3: Navigation
-// ══════════════════════════════
+
 test.describe('Navigation', () => {
 
   test('admin can navigate to Statistics page', async ({ page }) => {
