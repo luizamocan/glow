@@ -1,5 +1,6 @@
 const store = require("../data/store");
 const { validateService } = require("../validators/serviceValidator");
+const appointmentStore = require("../data/appointmentStore");
 
 // GET /api/services?page=1&limit=4&search=facial
 const getAllServices = (req, res) => {
@@ -126,4 +127,37 @@ const getStatistics = (req, res) => {
   res.json({ total, avgPrice, avgDuration, maxPrice, minPrice, priceTiers, durationBuckets });
 };
 
-module.exports = { getAllServices, getServiceById, createService, updateService, deleteService, getStatistics };
+// GET /api/services/:id/appointments
+// Returns all appointments booked for a specific service
+const getServiceAppointments = (req, res) => {
+  const {id} = req.params;
+  const appointments = appointmentStore.getByServiceId(id);
+  res.json({data: appointments, total: appointments.length});
+};
+
+// GET /api/services/:id/appointment-count
+// Returns the total number of appointments booked for a specific service
+const getServiceAppointmentCount = (req, res) => {
+  const {id} = req.params;
+  const count = appointmentStore.countByServiceId(id);
+  res.json({count});
+};
+
+// PUT /api/services/:id/appointments/:appId/status
+// Updates the status of a specific appointment for a service
+const updateAppointmentStatus = (req, res) => {
+  const {appointmentId} = req.params;
+  const {status} = req.body;
+  const validStatuses = ["Upcoming", "Completed", "Cancelled"];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ error: "Invalid status value" });
+  }
+
+  const updated=appointmentStore.updateStatus(appointmentId, status);
+  if (!updated) {
+    return res.status(404).json({ error: "Appointment not found" });
+  }
+  res.json(updated);
+};
+
+module.exports = { getAllServices, getServiceById, createService, updateService, deleteService, getStatistics, getServiceAppointments, getServiceAppointmentCount, updateAppointmentStatus };

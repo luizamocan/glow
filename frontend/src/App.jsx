@@ -30,7 +30,7 @@ export default function App() {
   const [appointments, setAppointments] = useState([
   { id: 1, service: "Manicure", date: "2024-03-10", time: "11:15 AM", price: "$30", status: "Completed", rating: 5, userEmail: "client@test.com" },
 ]);
-
+  const [wsRefreshKey, setWsRefreshKey] = useState(0);
   const navigate = (p,data = null) => {
     trackPageVisit(p);
     if (data) setSelectedService(data);
@@ -138,6 +138,7 @@ useEffect(() => {
         if (prev.find(s => s.id === data.payload.id)) return prev;
         return [...prev, data.payload];
       });
+      setWsRefreshKey(k => k + 1);
     }
   };
 
@@ -223,7 +224,7 @@ useEffect(() => {
   if (page === "services")    return <ServicesPage   onNavigate={navigate} services={services} setServices={setServices} onLogout={handleLogout} />;
   if (page === "statistics")  return <StatisticsPage onNavigate={navigate} services={services} onLogout={handleLogout} />;
   if (page === "client-home") return <ClientDashboard onNavigate={navigate} user={currentUser} services={services} onLogout={handleLogout} />;
-  if (page === "book") return <BookAGlow onNavigate={navigate} user={currentUser} services={services} onLogout={handleLogout} initialService={selectedService} onBook={addAppointment} />;
+  if (page === "book") return <BookAGlow onNavigate={navigate} user={currentUser} services={services} onLogout={handleLogout} initialService={selectedService} onBook={addAppointment} refreshKey={wsRefreshKey} />;
   if (page === "history") return <GlowHistory onNavigate={navigate} user={currentUser}  onLogout={handleLogout} appointments={appointments} setAppointments={setAppointments} cancelAppointment={cancelAppointment}/>;
   if (page === "profile") return <ProfilePage onNavigate={navigate} user={currentUser} appointments={appointments} onLogout={handleLogout} />;
   return <GlowAndShine

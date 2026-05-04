@@ -13,9 +13,12 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@apollo/server": "^5.5.0",
     "@faker-js/faker": "^10.4.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "graphql": "^16.13.2",
+    "graphql-tag": "^2.12.6",
     "ws": "^8.20.0"
   },
   "devDependencies": {

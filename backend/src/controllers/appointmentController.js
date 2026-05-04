@@ -13,6 +13,7 @@ const createAppointment = (req, res) => {
 
   const newApp = store.create({
     service: req.body.service,
+    serviceId: req.body.serviceId,
     date: req.body.date,
     time: req.body.time,
     price: req.body.price,
