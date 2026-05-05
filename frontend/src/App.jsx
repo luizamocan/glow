@@ -9,7 +9,9 @@ import { trackPageVisit, saveLastUser, incrementVisitCount } from "./cookies";
 import BookAGlow from "./pages/BookAGlow"; 
 import GlowHistory from "./pages/GlowHistory";
 import ProfilePage from "./pages/ProfilePage";
+import SecurityLogsPage from "./pages/SecurityLogsPage";
 import ChatWidget from "./components/ChatWidget";
+import { authHeaders } from "./api";
 import { API_BASE_URL, WS_BASE_URL } from "./config";
 
 const INITIAL_SERVICES = [
@@ -70,7 +72,7 @@ const addAppointment = async (newApp) => {
    
     const response = await fetch(`${API_BASE_URL}/api/appointments`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders(currentUser, { "Content-Type": "application/json" }),
       body: JSON.stringify(appointmentData),
     });
 
@@ -98,6 +100,7 @@ const cancelAppointment = async (id) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/appointments/${id}`, {
         method: "DELETE",
+        headers: authHeaders(currentUser),
       });
       if (!response.ok) throw new Error("Server error");
     } catch (error) {
@@ -155,12 +158,13 @@ useEffect(() => {
         try {
           if (action.type === 'DELETE') {
             await fetch(`${API_BASE_URL}/api/appointments/${action.id}`, {
-              method: "DELETE"
+              method: "DELETE",
+              headers: authHeaders(currentUser),
             });
           } else {
             await fetch(`${API_BASE_URL}/api/appointments`, {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: authHeaders(currentUser, { "Content-Type": "application/json" }),
               body: JSON.stringify(action),
             });
           }
@@ -181,7 +185,7 @@ useEffect(() => {
       for (const action of svcQueue) {
         try {
           let url = `${API_BASE_URL}/api/services`;
-          let options = { headers: { "Content-Type": "application/json" } };
+          let options = { headers: authHeaders(currentUser, { "Content-Type": "application/json" }) };
 
           if (action.type === 'ADD_SERVICE') {
             options.method = "POST";
@@ -218,7 +222,7 @@ useEffect(() => {
       window.removeEventListener("online", syncOfflineData);
       socket.close();
     };
-  }, []);
+  }, [currentUser]);
 
 
   const withChat = (content) => (
@@ -230,8 +234,9 @@ useEffect(() => {
 
   if (page === "login")       return <LoginPage      onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
   if (page === "signup")      return <SignUpPage     onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
-  if (page === "services")    return withChat(<ServicesPage   onNavigate={navigate} services={services} setServices={setServices} onLogout={handleLogout} />);
-  if (page === "statistics")  return withChat(<StatisticsPage onNavigate={navigate} services={services} onLogout={handleLogout} />);
+  if (page === "services")    return withChat(<ServicesPage   onNavigate={navigate} services={services} setServices={setServices} onLogout={handleLogout} user={currentUser} />);
+  if (page === "statistics")  return withChat(<StatisticsPage onNavigate={navigate} services={services} onLogout={handleLogout} user={currentUser} />);
+  if (page === "security")  return withChat(<SecurityLogsPage onNavigate={navigate} onLogout={handleLogout} user={currentUser} />);
   if (page === "client-home") return withChat(<ClientDashboard onNavigate={navigate} user={currentUser} services={services} onLogout={handleLogout} />);
   if (page === "book") return withChat(<BookAGlow onNavigate={navigate} user={currentUser} services={services} onLogout={handleLogout} initialService={selectedService} onBook={addAppointment} refreshKey={wsRefreshKey} />);
   if (page === "history") return withChat(<GlowHistory onNavigate={navigate} user={currentUser}  onLogout={handleLogout} appointments={appointments} setAppointments={setAppointments} cancelAppointment={cancelAppointment}/>);

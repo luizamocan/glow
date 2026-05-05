@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ClientSidebar from "../components/ClientSidebar";
 
 import { API_BASE_URL } from "../config";
+import { authHeaders } from "../api";
 import { getServiceImage } from "../serviceImages";
 
 const PAGE_LIMIT = 8;
@@ -114,11 +115,12 @@ export default function BookAGlow({ onNavigate, user, onLogout, initialService, 
   // ── Fetch a single page from the server ───────────────────────
   const fetchPage = useCallback(async (pageNum, search) => {
     const res = await fetch(
-      `${API_BASE_URL}/api/services?page=${pageNum}&limit=${PAGE_LIMIT}&search=${search}`
+      `${API_BASE_URL}/api/services?page=${pageNum}&limit=${PAGE_LIMIT}&search=${search}`,
+      { headers: authHeaders(user) }
     );
     if (!res.ok) throw new Error("Failed to fetch");
     return await res.json(); // { data, pagination }
-  }, []);
+  }, [user]);
 
   // ── Prefetch next page silently into cache ─────────────────────
   const prefetchNext = useCallback(async (currentPage, search) => {

@@ -13,6 +13,12 @@ const login = async (req, res) => {
     return res.status(401).json({ error: "Invalid email or password" });
   }
 
+  res.locals.securityUser = {
+    userId: user.id,
+    userEmail: user.email,
+    groupId: user.roleName || user.role,
+  };
+
   const { password: _password, ...safeUser } = user;
   res.json(safeUser);
 };
@@ -33,6 +39,11 @@ const register = async (req, res) => {
   }
 
   const user = await userStore.createClientUser({ name, email, password, phone });
+  res.locals.securityUser = {
+    userId: user.id,
+    userEmail: user.email,
+    groupId: user.roleName || user.role,
+  };
   res.status(201).json(user);
 };
 

@@ -9,6 +9,9 @@
 - Filters and pagination for services and clients.
 - Statistics for services.
 - A normalized schema where appointments reference services and clients by foreign keys.
+- Role and permission management with `roles`, `permissions`, `user_roles`, and `role_permissions`.
+- Real-time chat with WebSockets and a JSON NoSQL-style message store.
+- Gold Challenge security logging with `action_logs` and `observation_list`.
 
 ## Database Commands
 
@@ -98,3 +101,56 @@ npm test
 ```
 
 The tests cover ORM schema creation, relational tables, foreign keys, uniqueness, seeded users, admin login, CRUD operations, filters, statistics, and appointment-client-service persistence.
+
+## Gold Challenge Demo
+
+The backend persists each logged-in action in `action_logs`.
+
+Each log entry stores:
+
+```text
+USER_ID
+GROUP_ID / ROLE
+ACTION_INFORMATION
+HTTP METHOD
+ENDPOINT
+STATUS CODE
+IP ADDRESS
+TIMESTAMP
+```
+
+The malicious-behavior detector places suspicious identities in `observation_list`.
+
+Current detection rules:
+
+- 3 failed login attempts in 10 minutes -> high severity.
+- 3 delete actions in 5 minutes -> high severity.
+- 5 failed/invalid requests in 10 minutes -> medium severity.
+- 20 actions in 5 minutes -> medium severity.
+
+Admin frontend demo:
+
+```text
+Login as admin -> open Security Logs from the admin sidebar
+```
+
+API demo:
+
+```powershell
+Invoke-RestMethod http://localhost:5000/api/security/logs
+Invoke-RestMethod http://localhost:5000/api/security/observations
+```
+
+Trigger suspicious behavior:
+
+```powershell
+Invoke-RestMethod -Method Post http://localhost:5000/api/auth/login -ContentType "application/json" -Body '{"email":"bad@example.com","password":"wrong"}'
+Invoke-RestMethod -Method Post http://localhost:5000/api/auth/login -ContentType "application/json" -Body '{"email":"bad@example.com","password":"wrong"}'
+Invoke-RestMethod -Method Post http://localhost:5000/api/auth/login -ContentType "application/json" -Body '{"email":"bad@example.com","password":"wrong"}'
+```
+
+Then refresh the Security Logs page or call:
+
+```powershell
+Invoke-RestMethod http://localhost:5000/api/security/observations
+```

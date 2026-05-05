@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import ClientSidebar from "../components/ClientSidebar";
 import { API_BASE_URL } from "../config";
+import { authHeaders } from "../api";
 
 const s = {
   page: { display: "flex", minHeight: "100vh", background: "#fff", fontFamily: "'Libre Bodoni', serif" },
@@ -53,10 +54,14 @@ const s = {
 };
 
 export default function GlowHistory({ onNavigate, user, onLogout, appointments, setAppointments, cancelAppointment }) {
+  const userEmail = user?.email;
+
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/appointments?email=${user.email}`);
+        const response = await fetch(`${API_BASE_URL}/api/appointments?email=${userEmail}`, {
+          headers: authHeaders(user),
+        });
         if (response.ok) {
           const data = await response.json();
           setAppointments(data); 
@@ -66,10 +71,10 @@ export default function GlowHistory({ onNavigate, user, onLogout, appointments, 
       }
     };
 
-    if (user?.email) fetchHistory();
-  }, [user.email, setAppointments]);
+    if (userEmail) fetchHistory();
+  }, [user, userEmail, setAppointments]);
 
-  const myGlows = appointments.filter(app => app.userEmail === user?.email);
+  const myGlows = appointments.filter(app => app.userEmail === userEmail);
   const futureGlows = myGlows.filter(app => app.status === "Upcoming");
   const pastGlows = myGlows.filter(app => app.status === "Completed");
 

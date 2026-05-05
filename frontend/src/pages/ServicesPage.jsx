@@ -7,8 +7,9 @@ import ServiceDetailModal from "../components/ServiceDetailModal";
 import Toast, { useToast } from "../components/Toast";
 import { s } from "./ServicesPage.styles";
 import { API_BASE_URL } from "../config";
+import { authHeaders } from "../api";
 
-export default function ServicesPage({ onNavigate, onLogout, setServices: setGlobalServices }) {
+export default function ServicesPage({ onNavigate, onLogout, setServices: setGlobalServices, user }) {
   console.log("setGlobalServices is:", setGlobalServices);
   const { toast, showToast } = useToast();
   const [services, setServices] = useState([]);
@@ -25,7 +26,9 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
 
  const syncGlobalServices = useCallback(async () => {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/services?page=1&limit=1000`);
+    const res = await fetch(`${API_BASE_URL}/api/services?page=1&limit=1000`, {
+      headers: authHeaders(user),
+    });
     const result = await res.json();
     console.log("syncGlobalServices result:", result); 
     if (res.ok) {
@@ -35,7 +38,7 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
   } catch (e) {
     console.error("syncGlobalServices failed:", e); 
   }
-}, [setGlobalServices]);
+}, [setGlobalServices, user]);
 
 
   const fetchServices = useCallback(async () => {
@@ -45,7 +48,9 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
         limit: "4",
         search,
       });
-      const response = await fetch(`${API_BASE_URL}/api/services?${params}`);
+      const response = await fetch(`${API_BASE_URL}/api/services?${params}`, {
+        headers: authHeaders(user),
+      });
       const result = await response.json();
       
       if (response.ok) {
@@ -57,7 +62,7 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
     } catch (err) {
       showToast("Backend server is not reachable", "error");
     }
-  }, [page, search, showToast]);
+  }, [page, search, showToast, user]);
 
   useEffect(() => {
     fetchServices();
@@ -78,7 +83,7 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
     try {
       const response = await fetch(`${API_BASE_URL}/api/services`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(user, { "Content-Type": "application/json" }),
         body: JSON.stringify(form),
       });
 
@@ -103,7 +108,7 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
     try {
       const response = await fetch(`${API_BASE_URL}/api/services/${form.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(user, { "Content-Type": "application/json" }),
         body: JSON.stringify(form),
       });
 
@@ -129,6 +134,7 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
     try {
       const response = await fetch(`${API_BASE_URL}/api/services/${targetId}`, {
         method: "DELETE",
+        headers: authHeaders(user),
       });
 
       if (response.status === 204) {

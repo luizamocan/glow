@@ -4,8 +4,11 @@ const {
   Client,
   Appointment,
   User,
+  ActionLog,
+  ObservationList,
   syncDatabase,
 } = require("../src/models");
+const securityService = require("../src/services/securityService");
 
 beforeEach(async () => {
   await syncDatabase({ force: true });
@@ -19,7 +22,18 @@ describe("ORM database schema", () => {
   test("migrates the domain entities into relational tables", async () => {
     const tables = await sequelize.getQueryInterface().showAllTables();
 
-    expect(tables).toEqual(expect.arrayContaining(["services", "clients", "appointments", "users"]));
+    expect(tables).toEqual(expect.arrayContaining([
+      "services",
+      "clients",
+      "appointments",
+      "users",
+      "roles",
+      "permissions",
+      "user_roles",
+      "role_permissions",
+      "action_logs",
+      "observation_list",
+    ]));
   });
 
   test("stores services, clients, and appointments as separate normalized entities", async () => {
@@ -97,5 +111,45 @@ describe("ORM database schema", () => {
     expect(admin.clientId).toBeNull();
     expect(client.role).toBe("client");
     expect(client.clientId).toBe(1);
+  });
+
+  test("persists backend actions in the security log table", async () => {
+    await securityService.recordAction({
+      userId: 1,
+      userEmail: "admin@glowandshine.com",
+      groupId: "admin",
+      actionType: "services.delete",
+      actionInformation: "Admin deleted service 1",
+      method: "DELETE",
+      endpoint: "/api/services/1",
+      statusCode: 204,
+    });
+
+    const log = await ActionLog.findOne({ where: { userId: 1 } });
+    expect(log.groupId).toBe("admin");
+    expect(log.actionType).toBe("services.delete");
+    expect(log.actionInformation).toContain("Admin deleted");
+  });
+
+  test("places suspicious users in the observation list after repeated failed logins", async () => {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      await securityService.recordAction({
+        userEmail: "intruder@example.com",
+        groupId: "anonymous",
+        actionType: "auth.login",
+        actionInformation: `Failed login attempt ${attempt + 1}`,
+        method: "POST",
+        endpoint: "/api/auth/login",
+        statusCode: 401,
+      });
+    }
+
+    const observation = await ObservationList.findOne({
+      where: { observedIdentity: "email:intruder@example.com" },
+    });
+
+    expect(observation).not.toBeNull();
+    expect(observation.severity).toBe("high");
+    expect(observation.reason).toContain("failed login");
   });
 });

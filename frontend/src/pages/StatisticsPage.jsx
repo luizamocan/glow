@@ -3,6 +3,7 @@ import { Chart, registerables } from "chart.js";
 import Sidebar from "../components/Sidebar";
 import { s, AVATAR_HEADER } from "./StatisticsPage.styles";
 import { API_BASE_URL } from "../config";
+import { authHeaders } from "../api";
 
 Chart.register(...registerables);
 
@@ -225,7 +226,7 @@ function TabularView({ services }) {
 
 
 
-export default function StatisticsPage({ onNavigate, onLogout, services }) {
+export default function StatisticsPage({ onNavigate, onLogout, services, user }) {
   console.log("StatisticsPage received services:", services);
   const [view, setView] = useState("chart");
 
@@ -234,7 +235,7 @@ export default function StatisticsPage({ onNavigate, onLogout, services }) {
       console.log("Requesting generator start...");
       const response = await fetch(`${API_BASE_URL}/api/admin/start-gen`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" }
+        headers: authHeaders(user, { "Content-Type": "application/json" })
       });
 
       if (response.ok) {
@@ -251,7 +252,10 @@ export default function StatisticsPage({ onNavigate, onLogout, services }) {
 
   const handleStopGenerator = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/stop-gen`, { method: "POST" });
+      const response = await fetch(`${API_BASE_URL}/api/admin/stop-gen`, {
+        method: "POST",
+        headers: authHeaders(user),
+      });
       if (response.ok) alert("Faker Generator Stopped.");
     } catch (e) {
       alert("Error: Server unreachable.");

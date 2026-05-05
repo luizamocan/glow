@@ -5,6 +5,8 @@ const Appointment = require("./Appointment");
 const User = require("./User");
 const Role = require("./Role");
 const Permission = require("./Permission");
+const ActionLog = require("./ActionLog");
+const ObservationList = require("./ObservationList");
 
 Service.hasMany(Appointment, {
   foreignKey: "serviceId",
@@ -37,6 +39,28 @@ Client.hasOne(User, {
 User.belongsTo(Client, {
   foreignKey: "clientId",
   as: "client",
+});
+
+User.hasMany(ActionLog, {
+  foreignKey: "userId",
+  as: "actionLogs",
+  onDelete: "SET NULL",
+});
+
+ActionLog.belongsTo(User, {
+  foreignKey: "userId",
+  as: "user",
+});
+
+User.hasMany(ObservationList, {
+  foreignKey: "userId",
+  as: "observations",
+  onDelete: "SET NULL",
+});
+
+ObservationList.belongsTo(User, {
+  foreignKey: "userId",
+  as: "user",
 });
 
 User.belongsToMany(Role, {
@@ -204,6 +228,8 @@ module.exports = {
   User,
   Role,
   Permission,
+  ActionLog,
+  ObservationList,
   syncDatabase,
   seedDatabase,
   seedServices,

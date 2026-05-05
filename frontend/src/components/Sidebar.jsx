@@ -6,6 +6,7 @@ import  ICON_APPOINTMENTS from "../assets/calendar.png";
 import  ICON_SERVICES from "../assets/services.png";
 import  ICON_STATISTICS from "../assets/statistics.png";
 import  ICON_LOGOUT from "../assets/logout.png";
+import  ICON_SECURITY from "../assets/profile.png";
 import AVATAR_IMG from "../assets/client.jpg"; 
 
 const s = {
@@ -59,6 +60,10 @@ export default function Sidebar({ activePage, onNavigate, onLogout }) {
         <div style={s.navItem(activePage === "statistics")} className={"sidebar-item" + (activePage === "statistics" ? " active" : "")} onClick={() => onNavigate("statistics")}>
           <img src={ICON_STATISTICS} alt="Statistics" style={s.icon} />
           Statistics
+        </div>
+        <div style={s.navItem(activePage === "security")} className={"sidebar-item" + (activePage === "security" ? " active" : "")} onClick={() => onNavigate("security")}>
+          <img src={ICON_SECURITY} alt="Security Logs" style={s.icon} />
+          Security Logs
         </div>
       </nav>
       <div style={s.bottom}>

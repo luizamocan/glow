@@ -4,6 +4,7 @@ const WebSocket = require("ws");
 const { faker } = require("@faker-js/faker");
 const store = require("./src/data/store");
 const chatStore = require("./src/data/chatStore");
+const securityService = require("./src/services/securityService");
 const app = require("./src/app"); 
 const { syncDatabase } = require("./src/models");
 const PORT = 5000;
@@ -36,6 +37,18 @@ wss.on("connection", (socket) => {
 
         const savedMessage = await chatStore.create(event.payload || {});
         if (savedMessage) {
+            await securityService.recordAction({
+                userId: savedMessage.userId,
+                userEmail: savedMessage.userEmail,
+                groupId: savedMessage.role,
+                actionType: "chat.message.send",
+                actionInformation: {
+                    messageId: savedMessage.id,
+                    length: savedMessage.text.length
+                },
+                method: "WEBSOCKET",
+                endpoint: "ws://chat",
+            });
             broadcast({ type: "CHAT_MESSAGE", payload: savedMessage });
         }
     });
