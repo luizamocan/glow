@@ -1,0 +1,20 @@
+[
+  {
+    "id": "1777968732131-98dd7e907629a8",
+    "userId": 2,
+    "userName": "Luiza Mocan",
+    "userEmail": "client@glowandshine.com",
+    "role": "user",
+    "text": "hello all",
+    "createdAt": "2026-05-05T08:12:12.131Z"
+  },
+  {
+    "id": "1777968741271-e853989753eda8",
+    "userId": 3,
+    "userName": "Ana",
+    "userEmail": "ana@glow.com",
+    "role": "user",
+    "text": "hello",
+    "createdAt": "2026-05-05T08:12:21.271Z"
+  }
+]

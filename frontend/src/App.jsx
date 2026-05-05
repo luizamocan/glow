@@ -9,6 +9,7 @@ import { trackPageVisit, saveLastUser, incrementVisitCount } from "./cookies";
 import BookAGlow from "./pages/BookAGlow"; 
 import GlowHistory from "./pages/GlowHistory";
 import ProfilePage from "./pages/ProfilePage";
+import ChatWidget from "./components/ChatWidget";
 import { API_BASE_URL, WS_BASE_URL } from "./config";
 
 const INITIAL_SERVICES = [
@@ -220,14 +221,21 @@ useEffect(() => {
   }, []);
 
 
+  const withChat = (content) => (
+    <>
+      {content}
+      {currentUser && <ChatWidget user={currentUser} />}
+    </>
+  );
+
   if (page === "login")       return <LoginPage      onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
   if (page === "signup")      return <SignUpPage     onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
-  if (page === "services")    return <ServicesPage   onNavigate={navigate} services={services} setServices={setServices} onLogout={handleLogout} />;
-  if (page === "statistics")  return <StatisticsPage onNavigate={navigate} services={services} onLogout={handleLogout} />;
-  if (page === "client-home") return <ClientDashboard onNavigate={navigate} user={currentUser} services={services} onLogout={handleLogout} />;
-  if (page === "book") return <BookAGlow onNavigate={navigate} user={currentUser} services={services} onLogout={handleLogout} initialService={selectedService} onBook={addAppointment} refreshKey={wsRefreshKey} />;
-  if (page === "history") return <GlowHistory onNavigate={navigate} user={currentUser}  onLogout={handleLogout} appointments={appointments} setAppointments={setAppointments} cancelAppointment={cancelAppointment}/>;
-  if (page === "profile") return <ProfilePage onNavigate={navigate} user={currentUser} appointments={appointments} onLogout={handleLogout} />;
+  if (page === "services")    return withChat(<ServicesPage   onNavigate={navigate} services={services} setServices={setServices} onLogout={handleLogout} />);
+  if (page === "statistics")  return withChat(<StatisticsPage onNavigate={navigate} services={services} onLogout={handleLogout} />);
+  if (page === "client-home") return withChat(<ClientDashboard onNavigate={navigate} user={currentUser} services={services} onLogout={handleLogout} />);
+  if (page === "book") return withChat(<BookAGlow onNavigate={navigate} user={currentUser} services={services} onLogout={handleLogout} initialService={selectedService} onBook={addAppointment} refreshKey={wsRefreshKey} />);
+  if (page === "history") return withChat(<GlowHistory onNavigate={navigate} user={currentUser}  onLogout={handleLogout} appointments={appointments} setAppointments={setAppointments} cancelAppointment={cancelAppointment}/>);
+  if (page === "profile") return withChat(<ProfilePage onNavigate={navigate} user={currentUser} appointments={appointments} onLogout={handleLogout} />);
   return <GlowAndShine
     onExplore={() => navigate("login")}
     onLogin={() => navigate("login")}

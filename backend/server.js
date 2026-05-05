@@ -3,6 +3,7 @@ const http = require("http");
 const WebSocket = require("ws");
 const { faker } = require("@faker-js/faker");
 const store = require("./src/data/store");
+const chatStore = require("./src/data/chatStore");
 const app = require("./src/app"); 
 const { syncDatabase } = require("./src/models");
 const PORT = 5000;
@@ -13,6 +14,32 @@ const wss = new WebSocket.Server({ server });
 
 let generationInterval = null;
 
+const broadcast = (payload) => {
+    const message = JSON.stringify(payload);
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
+        }
+    });
+};
+
+wss.on("connection", (socket) => {
+    socket.on("message", async (rawMessage) => {
+        let event;
+        try {
+            event = JSON.parse(rawMessage.toString());
+        } catch (_) {
+            return;
+        }
+
+        if (event.type !== "CHAT_SEND") return;
+
+        const savedMessage = await chatStore.create(event.payload || {});
+        if (savedMessage) {
+            broadcast({ type: "CHAT_MESSAGE", payload: savedMessage });
+        }
+    });
+});
 
 const generateRandomServices = async () => {
     const newService = await store.create({
@@ -22,16 +49,7 @@ const generateRandomServices = async () => {
         description: faker.commerce.productDescription().substring(0, 100)
     });
 
-    const message = JSON.stringify({ 
-        type: "DATA_UPDATED", 
-        payload: newService 
-    });
-
-    wss.clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(message);
-        }
-    });
+    broadcast({ type: "DATA_UPDATED", payload: newService });
 
     console.log(`[LIVE] Generated: ${newService.name}`);
 };

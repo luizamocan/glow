@@ -1,15 +1,44 @@
-const { User, Client } = require("../models");
+const { User, Client, Role, Permission } = require("../models");
 
 const toPlain = (model) => (model ? model.get({ plain: true }) : null);
+
+const withAuthorizationProfile = (user) => {
+  if (!user) return null;
+  const roles = user.roles || [];
+  const primaryRole = roles[0]?.name || user.role || "client";
+  const permissions = [...new Set(roles.flatMap((role) => role.permissions?.map((permission) => permission.code) || []))];
+
+  return {
+    ...user,
+    roleName: primaryRole,
+    permissions,
+    // Keep the original client-facing role name for existing navigation logic.
+    role: primaryRole === "user" ? "client" : primaryRole,
+  };
+};
 
 const withoutPassword = (user) => {
   if (!user) return null;
   const { password, ...safeUser } = user;
-  return safeUser;
+  return withAuthorizationProfile(safeUser);
 };
 
 const getByEmailWithPassword = async (email) =>
-  toPlain(await User.findOne({ where: { email }, include: [{ model: Client, as: "client" }] }));
+  withAuthorizationProfile(
+    toPlain(
+      await User.findOne({
+        where: { email },
+        include: [
+          { model: Client, as: "client" },
+          {
+            model: Role,
+            as: "roles",
+            include: [{ model: Permission, as: "permissions" }],
+          },
+        ],
+      })
+    )
+  );
 
 const getByEmail = async (email) => withoutPassword(await getByEmailWithPassword(email));
 
@@ -23,7 +52,10 @@ const createClientUser = async ({ name, email, password, phone }) => {
     clientId: client.id,
   });
 
-  return withoutPassword(toPlain(user));
+  const role = await Role.findOne({ where: { name: "user" } });
+  if (role) await user.setRoles([role]);
+
+  return getByEmail(email);
 };
 
 module.exports = { getByEmail, getByEmailWithPassword, createClientUser };
