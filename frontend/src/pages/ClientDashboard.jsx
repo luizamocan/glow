@@ -1,15 +1,7 @@
 import { useState } from "react";
 import ClientSidebar from "../components/ClientSidebar";
-import IMG_MASSAGE from "../assets/massage.jpg";
-import IMG_FACIAL from "../assets/facial.jpg";
-import IMG_MANICURE from "../assets/manicure.jpg";
-import IMG_BLOWDRY from "../assets/blow-dry.jpg";
-import IMG_HAIRCUT from "../assets/haircut.jpg";
-import IMG_COLLORING from "../assets/hair-coloring.jpg";
-import IMG_PEDICURE from "../assets/pedicure.jpg";
-import IMG_TREATMENT from "../assets/spa-treatment.jpg";
-import IMG_SHAPING from "../assets/eyebrow-shaping.jpg";
 import { saveMoodPreference, getMoodPreference } from "../cookies";
+import { getServiceImage } from "../serviceImages";
 
 
 
@@ -32,18 +24,6 @@ const MOODS = [
   { label: "Stressed",     icon: ICON_THUNDER, bg: "#b0b8c8" },
   { label: "Want to Glow", icon: ICON_STAR,    bg: "#e8c8e0" },
 ];
-
-const SERVICE_IMAGES = {
-  "Deep Massage": IMG_MASSAGE,
-  "Facial": IMG_FACIAL,
-  "Manicure": IMG_MANICURE,
-  "Hair Coloring": IMG_COLLORING,
-  "Spa Treatment": IMG_TREATMENT,
-  "Pedicure": IMG_PEDICURE,
-  "Haircut": IMG_HAIRCUT,
-  "Eyebrow Shaping": IMG_SHAPING,
-  "Blow dry": IMG_BLOWDRY,
-};
 
 const getRating = (name) => {
   const ratings = { "Deep Massage": 5, "Facial": 5, "Manicure": 4, "Spa Treatment": 5, "Pedicure": 4, "Haircut": 4, "Eyebrow Shaping": 4, "Hair Coloring": 3 };
@@ -194,7 +174,7 @@ export default function ClientDashboard({ onNavigate, user, services, onLogout }
               <div key={sv.id} style={s.serviceCard(i === 0)} className="service-card-hover">
                 {i === 0 && <div style={s.bestBadge}>Best match!</div>}
                 <img
-                  src={SERVICE_IMAGES[sv.name] || IMG_FACIAL}
+                  src={getServiceImage(sv)}
                   alt={sv.name}
                   style={s.serviceImg}
                 />

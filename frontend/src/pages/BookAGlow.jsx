@@ -1,27 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ClientSidebar from "../components/ClientSidebar";
 
-import IMG_MASSAGE from "../assets/massage.jpg";
-import IMG_FACIAL from "../assets/facial.jpg";
-import IMG_MANICURE from "../assets/manicure.jpg";
-import IMG_BLOWDRY from "../assets/blow-dry.jpg";
-import IMG_HAIRCUT from "../assets/haircut.jpg";
-import IMG_COLLORING from "../assets/hair-coloring.jpg";
-import IMG_PEDICURE from "../assets/pedicure.jpg";
-import IMG_TREATMENT from "../assets/spa-treatment.jpg";
-import IMG_SHAPING from "../assets/eyebrow-shaping.jpg";
-
-const SERVICE_IMAGES = {
-  "Deep Massage": IMG_MASSAGE,
-  "Facial": IMG_FACIAL,
-  "Manicure": IMG_MANICURE,
-  "Hair Coloring": IMG_COLLORING,
-  "Spa Treatment": IMG_TREATMENT,
-  "Pedicure": IMG_PEDICURE,
-  "Haircut": IMG_HAIRCUT,
-  "Eyebrow Shaping": IMG_SHAPING,
-  "Blow dry": IMG_BLOWDRY,
-};
+import { API_BASE_URL } from "../config";
+import { getServiceImage } from "../serviceImages";
 
 const PAGE_LIMIT = 8;
 
@@ -133,7 +114,7 @@ export default function BookAGlow({ onNavigate, user, onLogout, initialService, 
   // ── Fetch a single page from the server ───────────────────────
   const fetchPage = useCallback(async (pageNum, search) => {
     const res = await fetch(
-      `http://localhost:5000/api/services?page=${pageNum}&limit=${PAGE_LIMIT}&search=${search}`
+      `${API_BASE_URL}/api/services?page=${pageNum}&limit=${PAGE_LIMIT}&search=${search}`
     );
     if (!res.ok) throw new Error("Failed to fetch");
     return await res.json(); // { data, pagination }
@@ -278,7 +259,7 @@ export default function BookAGlow({ onNavigate, user, onLogout, initialService, 
         <div style={s.grid}>
           {services.map(sv => (
             <div key={sv.id} style={s.card}>
-              <img src={SERVICE_IMAGES[sv.name] || IMG_FACIAL} alt={sv.name} style={s.cardImg} />
+              <img src={getServiceImage(sv)} alt={sv.name} style={s.cardImg} />
               <div style={s.cardContent}>
                 <h3 style={s.cardName}>{sv.name}</h3>
                 <StarRating />

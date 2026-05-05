@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Chart, registerables } from "chart.js";
 import Sidebar from "../components/Sidebar";
 import { s, AVATAR_HEADER } from "./StatisticsPage.styles";
+import { API_BASE_URL } from "../config";
 
 Chart.register(...registerables);
 
@@ -231,7 +232,7 @@ export default function StatisticsPage({ onNavigate, onLogout, services }) {
   const handleStartGenerator = async () => {
     try {
       console.log("Requesting generator start...");
-      const response = await fetch("http://localhost:5000/api/admin/start-gen", {
+      const response = await fetch(`${API_BASE_URL}/api/admin/start-gen`, {
         method: "POST",
         headers: { "Content-Type": "application/json" }
       });
@@ -250,7 +251,7 @@ export default function StatisticsPage({ onNavigate, onLogout, services }) {
 
   const handleStopGenerator = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/admin/stop-gen", { method: "POST" });
+      const response = await fetch(`${API_BASE_URL}/api/admin/stop-gen`, { method: "POST" });
       if (response.ok) alert("Faker Generator Stopped.");
     } catch (e) {
       alert("Error: Server unreachable.");

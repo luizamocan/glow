@@ -1,8 +1,15 @@
 const request = require("supertest");
 const app     = require("../src/app");
 const store   = require("../src/data/store");
+const { Service, sequelize } = require("../src/models");
 
-beforeEach(() => store.reset());
+beforeEach(async () => {
+  await store.reset();
+});
+
+afterAll(async () => {
+  await sequelize.close();
+});
 
 describe("GET /api/services", () => {
   test("returns paginated services", async () => {
@@ -203,9 +210,189 @@ describe("Global Error Handlers & Edge Cases", () => {
   });
 
   test("statistics returns 0 total if store is empty", async () => {
-    store.getAll().length = 0; 
+    await Service.destroy({ where: {} });
     const res = await request(app).get("/api/services/statistics");
     expect(res.status).toBe(200);
     expect(res.body.total).toBe(0);
+  });
+});
+
+describe("Appointment persistence and relational queries", () => {
+  test("creates an appointment linked to an existing service", async () => {
+    const res = await request(app).post("/api/appointments").send({
+      service: "Facial",
+      serviceId: 1,
+      date: "2026-05-10",
+      time: "10:00 AM",
+      price: 50,
+      userEmail: "client@example.com",
+    });
+
+    expect(res.status).toBe(201);
+    expect(res.body.id).toBeDefined();
+    expect(res.body.serviceId).toBe(1);
+    expect(res.body.service).toBe("Facial");
+    expect(res.body.userEmail).toBe("client@example.com");
+    expect(res.body.status).toBe("Upcoming");
+  });
+
+  test("filters appointments by email", async () => {
+    await request(app).post("/api/appointments").send({
+      service: "Facial",
+      serviceId: 1,
+      date: "2026-05-10",
+      time: "10:00 AM",
+      price: 50,
+      userEmail: "client@example.com",
+    });
+
+    const res = await request(app).get("/api/appointments?email=client@example.com");
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(1);
+    expect(res.body[0].userEmail).toBe("client@example.com");
+  });
+
+  test("counts and updates appointments for a service", async () => {
+    const created = await request(app).post("/api/appointments").send({
+      service: "Facial",
+      serviceId: 1,
+      date: "2026-05-10",
+      time: "10:00 AM",
+      price: 50,
+      userEmail: "client@example.com",
+    });
+
+    const count = await request(app).get("/api/services/1/appointment-count");
+    expect(count.status).toBe(200);
+    expect(count.body.count).toBe(1);
+
+    const updated = await request(app)
+      .put(`/api/services/1/appointments/${created.body.id}/status`)
+      .send({ status: "Completed" });
+
+    expect(updated.status).toBe(200);
+    expect(updated.body.status).toBe("Completed");
+  });
+
+  test("deletes an appointment", async () => {
+    const created = await request(app).post("/api/appointments").send({
+      service: "Facial",
+      serviceId: 1,
+      date: "2026-05-10",
+      time: "10:00 AM",
+      price: 50,
+      userEmail: "client@example.com",
+    });
+
+    const deleted = await request(app).delete(`/api/appointments/${created.body.id}`);
+    expect(deleted.status).toBe(204);
+
+    const res = await request(app).get("/api/appointments?email=client@example.com");
+    expect(res.body).toHaveLength(0);
+  });
+});
+
+describe("Client persistence", () => {
+  test("returns paginated clients", async () => {
+    const res = await request(app).get("/api/clients");
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.pagination.total).toBe(1);
+  });
+
+  test("creates a client", async () => {
+    const res = await request(app).post("/api/clients").send({
+      name: "Ana Pop",
+      email: "ana@example.com",
+      phone: "0711111111",
+    });
+
+    expect(res.status).toBe(201);
+    expect(res.body.id).toBeDefined();
+    expect(res.body.email).toBe("ana@example.com");
+  });
+
+  test("filters clients by search", async () => {
+    await request(app).post("/api/clients").send({
+      name: "Ana Pop",
+      email: "ana@example.com",
+    });
+
+    const res = await request(app).get("/api/clients?search=ana");
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.data[0].name).toBe("Ana Pop");
+  });
+
+  test("updates a client", async () => {
+    const created = await request(app).post("/api/clients").send({
+      name: "Ana Pop",
+      email: "ana@example.com",
+    });
+
+    const res = await request(app)
+      .put(`/api/clients/${created.body.id}`)
+      .send({ phone: "0722222222" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.phone).toBe("0722222222");
+  });
+
+  test("deletes a client", async () => {
+    const created = await request(app).post("/api/clients").send({
+      name: "Ana Pop",
+      email: "ana@example.com",
+    });
+
+    const deleted = await request(app).delete(`/api/clients/${created.body.id}`);
+    expect(deleted.status).toBe(204);
+
+    const check = await request(app).get(`/api/clients/${created.body.id}`);
+    expect(check.status).toBe(404);
+  });
+
+  test("rejects duplicate client email", async () => {
+    const res = await request(app).post("/api/clients").send({
+      name: "Another Client",
+      email: "client@glowandshine.com",
+    });
+
+    expect(res.status).toBe(409);
+  });
+});
+
+describe("DB-backed authentication", () => {
+  test("logs in with the seeded admin account", async () => {
+    const res = await request(app).post("/api/auth/login").send({
+      email: "admin@glowandshine.com",
+      password: "Admin@123",
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.email).toBe("admin@glowandshine.com");
+    expect(res.body.role).toBe("admin");
+    expect(res.body.password).toBeUndefined();
+  });
+
+  test("registers a new client account in users and clients", async () => {
+    const res = await request(app).post("/api/auth/register").send({
+      name: "Mara Ionescu",
+      email: "mara@example.com",
+      password: "Client@123",
+      phone: "0733333333",
+    });
+
+    expect(res.status).toBe(201);
+    expect(res.body.role).toBe("client");
+    expect(res.body.clientId).toBeDefined();
+
+    const login = await request(app).post("/api/auth/login").send({
+      email: "mara@example.com",
+      password: "Client@123",
+    });
+
+    expect(login.status).toBe(200);
+    expect(login.body.email).toBe("mara@example.com");
   });
 });

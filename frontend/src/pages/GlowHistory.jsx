@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import ClientSidebar from "../components/ClientSidebar";
+import { API_BASE_URL } from "../config";
 
 const s = {
   page: { display: "flex", minHeight: "100vh", background: "#fff", fontFamily: "'Libre Bodoni', serif" },
@@ -55,7 +56,7 @@ export default function GlowHistory({ onNavigate, user, onLogout, appointments, 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/appointments?email=${user.email}`);
+        const response = await fetch(`${API_BASE_URL}/api/appointments?email=${user.email}`);
         if (response.ok) {
           const data = await response.json();
           setAppointments(data); 

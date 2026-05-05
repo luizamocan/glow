@@ -1,53 +1,72 @@
+const { Op } = require("sequelize");
+const { Service, syncDatabase } = require("../models");
 
-let services = [
-  { id: 1, name: "Facial",          price: 50,  duration: 60,  description: "Deep skin cleansing treatment" },
-  { id: 2, name: "Haircut",         price: 35,  duration: 45,  description: "Precision haircut & styling" },
-  { id: 3, name: "Manicure",        price: 30,  duration: 90,  description: "Full manicure service" },
-  { id: 4, name: "Spa Treatment",   price: 100, duration: 120, description: "Full body spa relaxation" },
-  { id: 5, name: "Pedicure",        price: 40,  duration: 60,  description: "Full pedicure with nail polish" },
-  { id: 6, name: "Eyebrow Shaping", price: 25,  duration: 30,  description: "Professional eyebrow threading" },
-  { id: 7, name: "Hair Coloring",   price: 80,  duration: 90,  description: "Full hair coloring" },
-  { id: 8, name: "Deep Massage",    price: 70,  duration: 75,  description: "Relaxing deep tissue massage" },
-];
+const toPlain = (model) => (model ? model.get({ plain: true }) : null);
 
-let nextId=9;
+const getAll = async ({ search = "", page, limit } = {}) => {
+  const where = search
+    ? {
+        name: {
+          [Op.like]: `%${search}%`,
+        },
+      }
+    : undefined;
 
-const getAll=()=> services;
+  const options = {
+    where,
+    order: [["id", "ASC"]],
+  };
 
-const getById= (id)=>services.find(s=> s.id==id);
+  if (page !== undefined && limit !== undefined) {
+    options.limit = limit;
+    options.offset = (page - 1) * limit;
+  }
 
-const create = (data)=>{
-    const newService= {id:nextId++,...data};
-    services.push(newService);
-    return newService;
+  const services = await Service.findAll(options);
+  return services.map(toPlain);
 };
 
-const update= (id,data)=>{
-    const index=services.findIndex(s=> s.id==id);
-    if(index == -1) return null;
-    services[index]= {...services[index],...data};
-    return services[index];
+const count = async ({ search = "" } = {}) => {
+  const where = search
+    ? {
+        name: {
+          [Op.like]: `%${search}%`,
+        },
+      }
+    : undefined;
+
+  return Service.count({ where });
 };
 
-const remove = (id)=>{
-    const index=services.findIndex(s=> s.id==id);
-    if(index==-1) return null;
-    services.splice(index,1);
-    return true;
+const getById = async (id) => toPlain(await Service.findByPk(id));
+
+const getByName = async (name) =>
+  toPlain(
+    await Service.findOne({
+      where: {
+        name: {
+          [Op.like]: name,
+        },
+      },
+    })
+  );
+
+const create = async (data) => toPlain(await Service.create(data));
+
+const update = async (id, data) => {
+  const service = await Service.findByPk(id);
+  if (!service) return null;
+  await service.update(data);
+  return toPlain(service);
 };
 
-const reset =()=>{
-    services = [
-    { id: 1, name: "Facial",          price: 50,  duration: 60,  description: "Deep skin cleansing treatment" },
-    { id: 2, name: "Haircut",         price: 35,  duration: 45,  description: "Precision haircut & styling" },
-    { id: 3, name: "Manicure",        price: 30,  duration: 90,  description: "Full manicure service" },
-    { id: 4, name: "Spa Treatment",   price: 100, duration: 120, description: "Full body spa relaxation" },
-    { id: 5, name: "Pedicure",        price: 40,  duration: 60,  description: "Full pedicure with nail polish" },
-    { id: 6, name: "Eyebrow Shaping", price: 25,  duration: 30,  description: "Professional eyebrow threading" },
-    { id: 7, name: "Hair Coloring",   price: 80,  duration: 90,  description: "Full hair coloring" },
-    { id: 8, name: "Deep Massage",    price: 70,  duration: 75,  description: "Relaxing deep tissue massage" },
-  ];
-  nextId = 9;
+const remove = async (id) => {
+  const deletedCount = await Service.destroy({ where: { id } });
+  return deletedCount > 0;
 };
 
-module.exports = {getAll,getById,create,update,remove,reset};
+const reset = async () => {
+  await syncDatabase({ force: true });
+};
+
+module.exports = { getAll, count, getById, getByName, create, update, remove, reset };

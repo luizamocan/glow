@@ -1,6 +1,7 @@
 import PROFILE_PIC_CLIENT from "../assets/profile_pic.png";
 import PROFILE_PIC_ADMIN from "../assets/client.jpg";
 import NEW_CLIENT from "../assets/client-avatar.jpg";
+import { API_BASE_URL } from "../config";
 const DEFAULT_USERS = [
   {
     id: 1,
@@ -24,14 +25,47 @@ const DEFAULT_USERS = [
 const savedUsers = localStorage.getItem("glow_users");
 export const USERS = savedUsers ? JSON.parse(savedUsers) : DEFAULT_USERS;
 
-export const loginUser = (email, password) => {
+const withAvatar = (user) => ({
+  ...user,
+  avatar: user.role === "admin" ? PROFILE_PIC_ADMIN : PROFILE_PIC_CLIENT,
+});
+
+export const loginUser = async (email, password) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (response.ok) {
+      return withAvatar(await response.json());
+    }
+  } catch (_) {
+    // Keep local fallback for offline development.
+  }
+
   const user = USERS.find(
     (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
   );
-  return user || null;
+  return user ? withAvatar(user) : null;
 };
 
-export const registerUser = (name, email, password) => {
+export const registerUser = async (name, email, password, phone = "") => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password, phone }),
+    });
+
+    if (response.ok) {
+      return { ...(await response.json()), avatar: NEW_CLIENT };
+    }
+  } catch (_) {
+    // Keep local fallback for offline development.
+  }
+
   const newUser = {
     id: Date.now(),
     email,

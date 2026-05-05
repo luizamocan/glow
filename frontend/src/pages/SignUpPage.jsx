@@ -8,7 +8,7 @@ export default function SignUpPage({ onNavigate, onLoginSuccess }) {
   const [errors, setErrors] = useState({});
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     const newErrors = {};
     if (!form.name.trim()) newErrors.name = "Full name is required";
     else if (form.name.trim().length < 2) newErrors.name = "Name must be at least 2 characters";
@@ -32,7 +32,7 @@ export default function SignUpPage({ onNavigate, onLoginSuccess }) {
     
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
     
-    const newUser = registerUser(form.name.trim(), form.email.trim(), form.password);
+    const newUser = await registerUser(form.name.trim(), form.email.trim(), form.password, form.phone.trim());
     onLoginSuccess(newUser);
   };
 

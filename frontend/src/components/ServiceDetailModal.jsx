@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "../config";
 import { saveLastViewedService } from "../cookies";
+import { getServiceImage } from "../serviceImages";
 
 const s = {
   overlay: {
@@ -99,7 +101,7 @@ export default function ServiceDetailModal({ service, onClose, onEdit, onDelete 
     const fetchAppointments = async () => {
       setLoadingAppts(true);
       try {
-        const res = await fetch(`http://localhost:5000/api/services/${service.id}/appointments`);
+        const res = await fetch(`${API_BASE_URL}/api/services/${service.id}/appointments`);
         const result = await res.json();
         setAppointments(result.data || []);
       } catch (_) {
@@ -115,7 +117,7 @@ export default function ServiceDetailModal({ service, onClose, onEdit, onDelete 
   const handleCancelAppointment = async (appointmentId) => {
     if (!window.confirm("Cancel this appointment?")) return;
     try {
-      await fetch(`http://localhost:5000/api/services/${service.id}/appointments/${appointmentId}`, {
+      await fetch(`${API_BASE_URL}/api/services/${service.id}/appointments/${appointmentId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "Cancelled" }),
@@ -129,7 +131,7 @@ export default function ServiceDetailModal({ service, onClose, onEdit, onDelete 
   // ── Mark appointment as completed ────────────────────────────
   const handleCompleteAppointment = async (appointmentId) => {
     try {
-      await fetch(`http://localhost:5000/api/services/${service.id}/appointments/${appointmentId}`, {
+      await fetch(`${API_BASE_URL}/api/services/${service.id}/appointments/${appointmentId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "Completed" }),
@@ -144,9 +146,7 @@ export default function ServiceDetailModal({ service, onClose, onEdit, onDelete 
     <div style={s.overlay} className="modal-overlay" onClick={onClose}>
       <div style={s.modal} className="modal-content" onClick={(e) => e.stopPropagation()}>
 
-        {service.image && (
-          <img src={service.image} alt={service.name} style={{ width: "100%", height: 140, objectFit: "cover", borderRadius: "32px 32px 0 0", flexShrink: 0 }} />
-        )}
+        <img src={getServiceImage(service)} alt={service.name} style={{ width: "100%", height: 140, objectFit: "cover", borderRadius: "32px 32px 0 0", flexShrink: 0 }} />
 
         <div style={s.header}>
           <div style={s.headerLeft}>

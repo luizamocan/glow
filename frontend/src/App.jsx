@@ -9,6 +9,7 @@ import { trackPageVisit, saveLastUser, incrementVisitCount } from "./cookies";
 import BookAGlow from "./pages/BookAGlow"; 
 import GlowHistory from "./pages/GlowHistory";
 import ProfilePage from "./pages/ProfilePage";
+import { API_BASE_URL, WS_BASE_URL } from "./config";
 
 const INITIAL_SERVICES = [
   { id: 1, name: "Facial",          price: "$50",  duration: "60 minutes",  description: "Deep skin cleansing treatment",              image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80" },
@@ -66,7 +67,7 @@ const addAppointment = async (newApp) => {
 
   try {
    
-    const response = await fetch("http://localhost:5000/api/appointments", {
+    const response = await fetch(`${API_BASE_URL}/api/appointments`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(appointmentData),
@@ -94,7 +95,7 @@ const cancelAppointment = async (id) => {
 
   if (navigator.onLine) {
     try {
-      const response = await fetch(`http://localhost:5000/api/appointments/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/appointments/${id}`, {
         method: "DELETE",
       });
       if (!response.ok) throw new Error("Server error");
@@ -116,7 +117,7 @@ const queueOfflineAction = (action) => {
 useEffect(() => {
   const loadInitialServices = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/services?page=1&limit=1000");
+      const res = await fetch(`${API_BASE_URL}/api/services?page=1&limit=1000`);
       const result = await res.json();
       if (res.ok && result.data?.length > 0) {
         setServices(result.data);
@@ -129,7 +130,7 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {
-  const socket = new WebSocket("ws://localhost:5000");
+  const socket = new WebSocket(WS_BASE_URL);
   socket.onmessage = (event) => {
     const data=JSON.parse(event.data);
     if(data.type === "DATA_UPDATED") {
@@ -152,11 +153,11 @@ useEffect(() => {
       for (const action of appQueue) {
         try {
           if (action.type === 'DELETE') {
-            await fetch(`http://localhost:5000/api/appointments/${action.id}`, {
+            await fetch(`${API_BASE_URL}/api/appointments/${action.id}`, {
               method: "DELETE"
             });
           } else {
-            await fetch("http://localhost:5000/api/appointments", {
+            await fetch(`${API_BASE_URL}/api/appointments`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(action),
@@ -178,7 +179,7 @@ useEffect(() => {
       console.log(`Syncing ${svcQueue.length} offline admin changes...`);
       for (const action of svcQueue) {
         try {
-          let url = "http://localhost:5000/api/services";
+          let url = `${API_BASE_URL}/api/services`;
           let options = { headers: { "Content-Type": "application/json" } };
 
           if (action.type === 'ADD_SERVICE') {

@@ -9,7 +9,7 @@ export default function LoginPage({ onNavigate, onLoginSuccess }) {
   const [showPassword, setShowPassword] = useState(false); 
   const [errors, setErrors] = useState({});
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     const newErrors = {};
 
     if (!email.trim()) newErrors.email = "Email is required";
@@ -23,7 +23,7 @@ export default function LoginPage({ onNavigate, onLoginSuccess }) {
 
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
 
-    const user = loginUser(email, password);
+    const user = await loginUser(email, password);
     if (!user) {
       setErrors({ general: "Invalid email or password" });
       return;

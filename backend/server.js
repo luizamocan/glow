@@ -4,6 +4,7 @@ const WebSocket = require("ws");
 const { faker } = require("@faker-js/faker");
 const store = require("./src/data/store");
 const app = require("./src/app"); 
+const { syncDatabase } = require("./src/models");
 const PORT = 5000;
 
 
@@ -13,8 +14,8 @@ const wss = new WebSocket.Server({ server });
 let generationInterval = null;
 
 
-const generateRandomServices = () => {
-    const newService = store.create({
+const generateRandomServices = async () => {
+    const newService = await store.create({
         name: faker.commerce.productName(),
         price: parseInt(faker.commerce.price({ min: 10, max: 200 })),
         duration: faker.helpers.arrayElement([30, 45, 60, 90]),
@@ -51,20 +52,18 @@ app.post('/api/admin/stop-gen', (req, res) => {
     res.json({ message: "Stopped" });
 });
 
-app.use((req, res) => res.status(404).json({ error: "Route not found" }));
-
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ error: "Internal server error" });
-});
-
-server.listen(PORT, () => {
-    console.log(`
+syncDatabase().then(() => {
+    server.listen(PORT, "0.0.0.0", () => {
+        console.log(`
      Glow & Shine Server Ready
     ----------------------------
-    API: http://localhost:${PORT}
-    WS:  ws://localhost:${PORT}
+    API: http://0.0.0.0:${PORT}
+    WS:  ws://0.0.0.0:${PORT}
     `);
+    });
+}).catch(error => {
+    console.error("Failed to initialize database:", error);
+    process.exit(1);
 });
 
 /*

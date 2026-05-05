@@ -6,6 +6,7 @@ import DeleteServiceModal from "../components/DeleteServiceModal";
 import ServiceDetailModal from "../components/ServiceDetailModal";
 import Toast, { useToast } from "../components/Toast";
 import { s } from "./ServicesPage.styles";
+import { API_BASE_URL } from "../config";
 
 export default function ServicesPage({ onNavigate, onLogout, setServices: setGlobalServices }) {
   console.log("setGlobalServices is:", setGlobalServices);
@@ -24,7 +25,7 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
 
  const syncGlobalServices = useCallback(async () => {
   try {
-    const res = await fetch(`http://localhost:5000/api/services?page=1&limit=1000`);
+    const res = await fetch(`${API_BASE_URL}/api/services?page=1&limit=1000`);
     const result = await res.json();
     console.log("syncGlobalServices result:", result); 
     if (res.ok) {
@@ -39,7 +40,12 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
 
   const fetchServices = useCallback(async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/services?page=${page}&limit=4&search=${search}`);
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: "4",
+        search,
+      });
+      const response = await fetch(`${API_BASE_URL}/api/services?${params}`);
       const result = await response.json();
       
       if (response.ok) {
@@ -70,7 +76,7 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
     const newService = { ...form, id: tempId };
 
     try {
-      const response = await fetch("http://localhost:5000/api/services", {
+      const response = await fetch(`${API_BASE_URL}/api/services`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -95,7 +101,7 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
 
   const handleEdit = async (form) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/services/${form.id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/services/${form.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -121,7 +127,7 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
   const handleDelete = async () => {
     const targetId = deleteTarget.id;
     try {
-      const response = await fetch(`http://localhost:5000/api/services/${targetId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/services/${targetId}`, {
         method: "DELETE",
       });
 
