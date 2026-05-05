@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1777969960317" clover="3.2.0">
-  <project timestamp="1777969960317" name="All files">
-    <metrics statements="638" coveredstatements="568" conditionals="463" coveredconditionals="319" methods="104" coveredmethods="84" elements="1205" coveredelements="971" complexity="0" loc="638" ncloc="638" packages="8" files="32" classes="32"/>
+<coverage generated="1777990707215" clover="3.2.0">
+  <project timestamp="1777990707215" name="All files">
+    <metrics statements="682" coveredstatements="600" conditionals="485" coveredconditionals="327" methods="110" coveredmethods="88" elements="1277" coveredelements="1015" complexity="0" loc="682" ncloc="682" packages="9" files="37" classes="37"/>
     <package name="src">
-      <metrics statements="25" coveredstatements="23" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="1"/>
+      <metrics statements="27" coveredstatements="25" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="1"/>
       <file name="app.js" path="C:\Users\Mocan Luiza\MPP\glow\backend\src\app.js">
-        <metrics statements="25" coveredstatements="23" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="1"/>
+        <metrics statements="27" coveredstatements="25" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="1"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
         <line num="3" count="1" type="stmt"/>
@@ -16,25 +16,36 @@
         <line num="8" count="1" type="stmt"/>
         <line num="9" count="1" type="stmt"/>
         <line num="10" count="1" type="stmt"/>
-        <line num="12" count="1" type="stmt"/>
+        <line num="11" count="1" type="stmt"/>
         <line num="13" count="1" type="stmt"/>
         <line num="14" count="1" type="stmt"/>
-        <line num="17" count="1" type="stmt"/>
+        <line num="15" count="1" type="stmt"/>
         <line num="18" count="1" type="stmt"/>
         <line num="19" count="1" type="stmt"/>
         <line num="20" count="1" type="stmt"/>
         <line num="21" count="1" type="stmt"/>
         <line num="22" count="1" type="stmt"/>
+        <line num="23" count="1" type="stmt"/>
         <line num="24" count="1" type="stmt"/>
         <line num="26" count="1" type="stmt"/>
         <line num="28" count="1" type="stmt"/>
-        <line num="29" count="0" type="stmt"/>
-        <line num="30" count="0" type="stmt"/>
-        <line num="33" count="1" type="stmt"/>
+        <line num="30" count="1" type="stmt"/>
+        <line num="31" count="0" type="stmt"/>
+        <line num="32" count="0" type="stmt"/>
+        <line num="35" count="1" type="stmt"/>
       </file>
     </package>
     <package name="src.controllers">
-      <metrics statements="182" coveredstatements="162" conditionals="143" coveredconditionals="97" methods="32" coveredmethods="28"/>
+      <metrics statements="188" coveredstatements="168" conditionals="145" coveredconditionals="99" methods="33" coveredmethods="29"/>
+      <file name="activityController.js" path="C:\Users\Mocan Luiza\MPP\glow\backend\src\controllers\activityController.js">
+        <metrics statements="6" coveredstatements="6" conditionals="2" coveredconditionals="2" methods="1" coveredmethods="1"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="16" count="1" type="stmt"/>
+      </file>
       <file name="appointmentController.js" path="C:\Users\Mocan Luiza\MPP\glow\backend\src\controllers\appointmentController.js">
         <metrics statements="18" coveredstatements="18" conditionals="8" coveredconditionals="4" methods="3" coveredmethods="3"/>
         <line num="1" count="1" type="stmt"/>
@@ -378,7 +389,7 @@
         <line num="64" count="2" type="stmt"/>
         <line num="65" count="2" type="stmt"/>
         <line num="68" count="1" type="stmt"/>
-        <line num="69" count="43" type="stmt"/>
+        <line num="69" count="44" type="stmt"/>
         <line num="72" count="1" type="stmt"/>
       </file>
       <file name="userStore.js" path="C:\Users\Mocan Luiza\MPP\glow\backend\src\data\userStore.js">
@@ -513,41 +524,89 @@
         <line num="160" count="2" type="stmt"/>
         <line num="161" count="24" type="stmt"/>
         <line num="165" count="2" type="stmt"/>
-        <line num="166" count="51" type="stmt"/>
-        <line num="167" count="51" type="cond" truecount="1" falsecount="1"/>
-        <line num="168" count="51" type="stmt"/>
-        <line num="171" count="51" type="stmt"/>
-        <line num="172" count="51" type="cond" truecount="1" falsecount="1"/>
-        <line num="173" count="51" type="stmt"/>
-        <line num="176" count="51" type="stmt"/>
-        <line num="177" count="51" type="cond" truecount="1" falsecount="1"/>
-        <line num="178" count="51" type="stmt"/>
-        <line num="181" count="51" type="stmt"/>
-        <line num="182" count="51" type="cond" truecount="1" falsecount="1"/>
-        <line num="183" count="51" type="stmt"/>
-        <line num="186" count="51" type="stmt"/>
-        <line num="187" count="51" type="cond" truecount="1" falsecount="1"/>
-        <line num="188" count="51" type="stmt"/>
-        <line num="191" count="51" type="stmt"/>
-        <line num="199" count="51" type="cond" truecount="3" falsecount="1"/>
-        <line num="200" count="51" type="cond" truecount="3" falsecount="1"/>
-        <line num="202" count="612" type="stmt"/>
-        <line num="203" count="51" type="cond" truecount="1" falsecount="1"/>
-        <line num="204" count="612" type="stmt"/>
-        <line num="206" count="51" type="cond" truecount="1" falsecount="1"/>
-        <line num="207" count="255" type="stmt"/>
-        <line num="210" count="51" type="stmt"/>
-        <line num="211" count="51" type="cond" truecount="1" falsecount="1"/>
-        <line num="212" count="51" type="stmt"/>
+        <line num="166" count="52" type="stmt"/>
+        <line num="167" count="52" type="cond" truecount="1" falsecount="1"/>
+        <line num="168" count="52" type="stmt"/>
+        <line num="171" count="52" type="stmt"/>
+        <line num="172" count="52" type="cond" truecount="1" falsecount="1"/>
+        <line num="173" count="52" type="stmt"/>
+        <line num="176" count="52" type="stmt"/>
+        <line num="177" count="52" type="cond" truecount="1" falsecount="1"/>
+        <line num="178" count="52" type="stmt"/>
+        <line num="181" count="52" type="stmt"/>
+        <line num="182" count="52" type="cond" truecount="1" falsecount="1"/>
+        <line num="183" count="52" type="stmt"/>
+        <line num="186" count="52" type="stmt"/>
+        <line num="187" count="52" type="cond" truecount="1" falsecount="1"/>
+        <line num="188" count="52" type="stmt"/>
+        <line num="191" count="52" type="stmt"/>
+        <line num="199" count="52" type="cond" truecount="3" falsecount="1"/>
+        <line num="200" count="52" type="cond" truecount="3" falsecount="1"/>
+        <line num="202" count="624" type="stmt"/>
+        <line num="203" count="52" type="cond" truecount="1" falsecount="1"/>
+        <line num="204" count="624" type="stmt"/>
+        <line num="206" count="52" type="cond" truecount="1" falsecount="1"/>
+        <line num="207" count="260" type="stmt"/>
+        <line num="210" count="52" type="stmt"/>
+        <line num="211" count="52" type="cond" truecount="1" falsecount="1"/>
+        <line num="212" count="52" type="stmt"/>
         <line num="216" count="2" type="cond" truecount="1" falsecount="2"/>
-        <line num="217" count="51" type="stmt"/>
-        <line num="218" count="51" type="cond" truecount="1" falsecount="1"/>
-        <line num="219" count="51" type="stmt"/>
+        <line num="217" count="52" type="stmt"/>
+        <line num="218" count="52" type="cond" truecount="1" falsecount="1"/>
+        <line num="219" count="52" type="stmt"/>
         <line num="223" count="2" type="stmt"/>
       </file>
     </package>
+    <package name="src.nosql">
+      <metrics statements="28" coveredstatements="16" conditionals="20" coveredconditionals="6" methods="5" coveredmethods="3"/>
+      <file name="ActivityLog.js" path="C:\Users\Mocan Luiza\MPP\glow\backend\src\nosql\ActivityLog.js">
+        <metrics statements="3" coveredstatements="3" conditionals="2" coveredconditionals="2" methods="0" coveredmethods="0"/>
+        <line num="1" count="2" type="stmt"/>
+        <line num="3" count="2" type="stmt"/>
+        <line num="25" count="2" type="stmt"/>
+      </file>
+      <file name="activityLogger.js" path="C:\Users\Mocan Luiza\MPP\glow\backend\src\nosql\activityLogger.js">
+        <metrics statements="17" coveredstatements="8" conditionals="14" coveredconditionals="2" methods="3" coveredmethods="2"/>
+        <line num="1" count="2" type="stmt"/>
+        <line num="2" count="2" type="stmt"/>
+        <line num="4" count="2" type="stmt"/>
+        <line num="5" count="0" type="cond" truecount="0" falsecount="6"/>
+        <line num="6" count="0" type="stmt"/>
+        <line num="7" count="0" type="stmt"/>
+        <line num="9" count="0" type="stmt"/>
+        <line num="13" count="2" type="stmt"/>
+        <line num="14" count="59" type="cond" truecount="1" falsecount="1"/>
+        <line num="16" count="0" type="stmt"/>
+        <line num="17" count="0" type="stmt"/>
+        <line num="29" count="0" type="stmt"/>
+        <line num="30" count="0" type="stmt"/>
+        <line num="34" count="2" type="cond" truecount="0" falsecount="2"/>
+        <line num="35" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="37" count="0" type="stmt"/>
+        <line num="45" count="2" type="stmt"/>
+      </file>
+      <file name="mongo.js" path="C:\Users\Mocan Luiza\MPP\glow\backend\src\nosql\mongo.js">
+        <metrics statements="8" coveredstatements="5" conditionals="4" coveredconditionals="2" methods="2" coveredmethods="1"/>
+        <line num="1" count="2" type="stmt"/>
+        <line num="3" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="5" count="2" type="stmt"/>
+        <line num="6" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="8" count="0" type="stmt"/>
+        <line num="12" count="0" type="stmt"/>
+        <line num="15" count="61" type="stmt"/>
+        <line num="17" count="2" type="stmt"/>
+      </file>
+    </package>
     <package name="src.routes">
-      <metrics statements="47" coveredstatements="47" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <metrics statements="52" coveredstatements="52" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="activityRoutes.js" path="C:\Users\Mocan Luiza\MPP\glow\backend\src\routes\activityRoutes.js">
+        <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="7" count="1" type="stmt"/>
+      </file>
       <file name="appointmentRoutes.js" path="C:\Users\Mocan Luiza\MPP\glow\backend\src\routes\appointmentRoutes.js">
         <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="1" type="stmt"/>
@@ -615,80 +674,83 @@
       </file>
     </package>
     <package name="src.services">
-      <metrics statements="71" coveredstatements="61" conditionals="98" coveredconditionals="69" methods="18" coveredmethods="12"/>
+      <metrics statements="74" coveredstatements="64" conditionals="98" coveredconditionals="69" methods="18" coveredmethods="12"/>
       <file name="securityService.js" path="C:\Users\Mocan Luiza\MPP\glow\backend\src\services\securityService.js">
-        <metrics statements="71" coveredstatements="61" conditionals="98" coveredconditionals="69" methods="18" coveredmethods="12"/>
+        <metrics statements="74" coveredstatements="64" conditionals="98" coveredconditionals="69" methods="18" coveredmethods="12"/>
         <line num="1" count="2" type="stmt"/>
         <line num="2" count="2" type="stmt"/>
-        <line num="4" count="2" type="stmt"/>
-        <line num="9" count="2" type="stmt"/>
-        <line num="10" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="3" count="2" type="stmt"/>
+        <line num="5" count="2" type="stmt"/>
+        <line num="10" count="2" type="stmt"/>
         <line num="11" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="12" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="15" count="54" type="stmt"/>
-        <line num="21" count="2" type="stmt"/>
-        <line num="22" count="54" type="stmt"/>
-        <line num="23" count="54" type="cond" truecount="2" falsecount="0"/>
-        <line num="24" count="52" type="cond" truecount="2" falsecount="0"/>
-        <line num="25" count="51" type="cond" truecount="1" falsecount="1"/>
-        <line num="26" count="51" type="cond" truecount="1" falsecount="1"/>
-        <line num="27" count="51" type="cond" truecount="1" falsecount="1"/>
-        <line num="29" count="51" type="cond" truecount="1" falsecount="1"/>
-        <line num="30" count="51" type="stmt"/>
-        <line num="37" count="51" type="cond" truecount="1" falsecount="1"/>
-        <line num="40" count="2" type="stmt"/>
-        <line num="41" count="54" type="cond" truecount="4" falsecount="0"/>
-        <line num="42" count="54" type="stmt"/>
-        <line num="52" count="2" type="stmt"/>
-        <line num="53" count="1" type="stmt"/>
+        <line num="12" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="13" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="16" count="55" type="stmt"/>
+        <line num="22" count="2" type="stmt"/>
+        <line num="23" count="55" type="stmt"/>
+        <line num="24" count="55" type="cond" truecount="2" falsecount="0"/>
+        <line num="25" count="53" type="cond" truecount="2" falsecount="0"/>
+        <line num="26" count="52" type="cond" truecount="1" falsecount="1"/>
+        <line num="27" count="52" type="cond" truecount="1" falsecount="1"/>
+        <line num="28" count="52" type="cond" truecount="1" falsecount="1"/>
+        <line num="30" count="52" type="cond" truecount="1" falsecount="1"/>
+        <line num="31" count="52" type="stmt"/>
+        <line num="38" count="52" type="cond" truecount="1" falsecount="1"/>
+        <line num="41" count="2" type="stmt"/>
+        <line num="42" count="55" type="cond" truecount="4" falsecount="0"/>
+        <line num="43" count="55" type="stmt"/>
+        <line num="53" count="2" type="stmt"/>
         <line num="54" count="1" type="stmt"/>
-        <line num="56" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="57" count="0" type="stmt"/>
-        <line num="66" count="0" type="stmt"/>
-        <line num="69" count="1" type="stmt"/>
-        <line num="80" count="2" type="cond" truecount="1" falsecount="0"/>
-        <line num="81" count="89" type="stmt"/>
-        <line num="93" count="2" type="stmt"/>
-        <line num="94" count="58" type="stmt"/>
-        <line num="95" count="58" type="stmt"/>
-        <line num="96" count="58" type="stmt"/>
-        <line num="98" count="58" type="cond" truecount="4" falsecount="0"/>
-        <line num="99" count="3" type="stmt"/>
-        <line num="104" count="3" type="cond" truecount="2" falsecount="0"/>
-        <line num="105" count="1" type="stmt"/>
-        <line num="113" count="58" type="cond" truecount="2" falsecount="0"/>
-        <line num="114" count="6" type="stmt"/>
-        <line num="119" count="6" type="cond" truecount="1" falsecount="1"/>
-        <line num="120" count="0" type="stmt"/>
-        <line num="128" count="58" type="cond" truecount="2" falsecount="0"/>
-        <line num="129" count="24" type="stmt"/>
-        <line num="134" count="22" type="cond" truecount="1" falsecount="1"/>
-        <line num="135" count="0" type="stmt"/>
-        <line num="143" count="56" type="stmt"/>
-        <line num="144" count="37" type="cond" truecount="1" falsecount="1"/>
-        <line num="145" count="0" type="stmt"/>
-        <line num="153" count="2" type="cond" truecount="1" falsecount="0"/>
-        <line num="154" count="54" type="stmt"/>
-        <line num="155" count="54" type="stmt"/>
-        <line num="167" count="54" type="stmt"/>
-        <line num="168" count="33" type="stmt"/>
-        <line num="171" count="2" type="stmt"/>
-        <line num="182" count="4" type="stmt"/>
-        <line num="194" count="4" type="stmt"/>
-        <line num="195" count="4" type="stmt"/>
-        <line num="198" count="2" type="stmt"/>
-        <line num="199" count="54" type="cond" truecount="1" falsecount="1"/>
-        <line num="201" count="54" type="stmt"/>
-        <line num="202" count="54" type="stmt"/>
-        <line num="203" count="21" type="stmt"/>
-        <line num="207" count="54" type="stmt"/>
-        <line num="210" count="2" type="cond" truecount="0" falsecount="2"/>
-        <line num="211" count="0" type="stmt"/>
+        <line num="55" count="1" type="stmt"/>
+        <line num="57" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="58" count="0" type="stmt"/>
+        <line num="67" count="0" type="stmt"/>
+        <line num="70" count="1" type="stmt"/>
+        <line num="81" count="2" type="cond" truecount="1" falsecount="0"/>
+        <line num="82" count="90" type="stmt"/>
+        <line num="94" count="2" type="stmt"/>
+        <line num="95" count="59" type="stmt"/>
+        <line num="96" count="59" type="stmt"/>
+        <line num="97" count="59" type="stmt"/>
+        <line num="99" count="59" type="cond" truecount="4" falsecount="0"/>
+        <line num="100" count="3" type="stmt"/>
+        <line num="105" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="106" count="1" type="stmt"/>
+        <line num="114" count="59" type="cond" truecount="2" falsecount="0"/>
+        <line num="115" count="6" type="stmt"/>
+        <line num="120" count="6" type="cond" truecount="1" falsecount="1"/>
+        <line num="121" count="0" type="stmt"/>
+        <line num="129" count="59" type="cond" truecount="2" falsecount="0"/>
+        <line num="130" count="24" type="stmt"/>
+        <line num="135" count="22" type="cond" truecount="1" falsecount="1"/>
+        <line num="136" count="0" type="stmt"/>
+        <line num="144" count="57" type="stmt"/>
+        <line num="145" count="38" type="cond" truecount="1" falsecount="1"/>
+        <line num="146" count="0" type="stmt"/>
+        <line num="154" count="2" type="cond" truecount="1" falsecount="0"/>
+        <line num="155" count="55" type="stmt"/>
+        <line num="156" count="55" type="stmt"/>
+        <line num="168" count="55" type="stmt"/>
+        <line num="169" count="55" type="stmt"/>
+        <line num="170" count="34" type="stmt"/>
+        <line num="173" count="2" type="stmt"/>
+        <line num="184" count="4" type="stmt"/>
+        <line num="196" count="4" type="stmt"/>
+        <line num="197" count="4" type="stmt"/>
+        <line num="198" count="4" type="stmt"/>
+        <line num="201" count="2" type="stmt"/>
+        <line num="202" count="55" type="cond" truecount="1" falsecount="1"/>
+        <line num="204" count="55" type="stmt"/>
+        <line num="205" count="55" type="stmt"/>
+        <line num="206" count="21" type="stmt"/>
+        <line num="210" count="55" type="stmt"/>
+        <line num="213" count="2" type="cond" truecount="0" falsecount="2"/>
         <line num="214" count="0" type="stmt"/>
-        <line num="216" count="2" type="stmt"/>
         <line num="217" count="0" type="stmt"/>
-        <line num="219" count="0" type="stmt"/>
-        <line num="221" count="2" type="stmt"/>
+        <line num="219" count="2" type="stmt"/>
+        <line num="220" count="0" type="stmt"/>
+        <line num="222" count="0" type="stmt"/>
+        <line num="224" count="2" type="stmt"/>
       </file>
     </package>
     <package name="src.validators">

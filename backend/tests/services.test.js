@@ -396,3 +396,14 @@ describe("DB-backed authentication", () => {
     expect(login.body.email).toBe("mara@example.com");
   });
 });
+
+describe("NoSQL activity endpoint", () => {
+  test("reports MongoDB activity status without breaking the relational API", async () => {
+    const res = await request(app).get("/api/activity");
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty("connected");
+    expect(res.body).toHaveProperty("data");
+    expect(Array.isArray(res.body.data)).toBe(true);
+  });
+});

@@ -6,6 +6,7 @@ const clientRoutes = require("./routes/clientRoutes");
 const authRoutes = require("./routes/authRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const securityRoutes = require("./routes/securityRoutes");
+const activityRoutes = require("./routes/activityRoutes");
 const { actionLogger } = require("./services/securityService");
 const app = express();
 
@@ -20,6 +21,7 @@ app.use("/api/clients", clientRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/security", securityRoutes);
+app.use("/api/activity", activityRoutes);
 
 app.get("/", (req, res) => res.json({ status: "Glow & Shine API running" }));
 

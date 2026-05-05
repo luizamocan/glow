@@ -7,6 +7,7 @@ const chatStore = require("./src/data/chatStore");
 const securityService = require("./src/services/securityService");
 const app = require("./src/app"); 
 const { syncDatabase } = require("./src/models");
+const { connectMongo, mongoUri } = require("./src/nosql/mongo");
 const PORT = 5000;
 
 
@@ -83,7 +84,14 @@ app.post('/api/admin/stop-gen', (req, res) => {
     res.json({ message: "Stopped" });
 });
 
-syncDatabase().then(() => {
+syncDatabase().then(async () => {
+    try {
+        await connectMongo();
+        console.log(`NoSQL: connected to ${mongoUri}`);
+    } catch (error) {
+        console.warn(`NoSQL: MongoDB not connected (${error.message})`);
+    }
+
     server.listen(PORT, "0.0.0.0", () => {
         console.log(`
      Glow & Shine Server Ready

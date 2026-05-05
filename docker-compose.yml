@@ -1,0 +1,28 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: glow-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      DB_STORAGE: /app/data/glow.sqlite
+      MONGO_URI: mongodb://mongo:27017/glow_nosql
+    volumes:
+      - glow_backend_data:/app/data
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:7
+    container_name: glow-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - glow_mongo_data:/data/db
+
+volumes:
+  glow_backend_data:
+  glow_mongo_data:

@@ -1,5 +1,6 @@
 const { Op } = require("sequelize");
 const { ActionLog, ObservationList } = require("../models");
+const { mirrorActionLog } = require("../nosql/activityLogger");
 
 const WINDOW = {
   tenMinutes: 10 * 60 * 1000,
@@ -164,6 +165,7 @@ const logAction = async ({ req, res, override = {} }) => {
     ipAddress: req.ip,
   });
 
+  await mirrorActionLog(log.get({ plain: true }));
   await evaluateSuspiciousBehavior(log.get({ plain: true }));
   return log;
 };
@@ -191,6 +193,7 @@ const recordAction = async ({
     ipAddress,
   });
 
+  await mirrorActionLog(log.get({ plain: true }));
   await evaluateSuspiciousBehavior(log.get({ plain: true }));
   return log;
 };

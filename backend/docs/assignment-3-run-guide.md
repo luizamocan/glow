@@ -11,6 +11,7 @@
 - A normalized schema where appointments reference services and clients by foreign keys.
 - Role and permission management with `roles`, `permissions`, `user_roles`, and `role_permissions`.
 - Real-time chat with WebSockets and a JSON NoSQL-style message store.
+- MongoDB NoSQL activity logs for the Silver database requirement.
 - Gold Challenge security logging with `action_logs` and `observation_list`.
 
 ## Database Commands
