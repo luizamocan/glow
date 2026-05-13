@@ -237,33 +237,83 @@ export default function BookAGlow({ onNavigate, user, onLogout, initialService, 
 
   return (
     <div style={s.page}>
+      <style>{`
+        @media (max-width: 768px) {
+          .book-main {
+            margin-left: 0 !important;
+            width: 100% !important;
+            padding: 20px 16px 92px !important;
+          }
+          .book-header { margin-top: 8px !important; margin-bottom: 22px !important; }
+          .book-title { font-size: 34px !important; line-height: 1.1 !important; }
+          .book-subtitle { font-size: 16px !important; }
+          .book-search {
+            max-width: none !important;
+            height: 48px !important;
+            border-radius: 16px !important;
+            margin-bottom: 22px !important;
+          }
+          .book-tabs {
+            gap: 10px !important;
+            overflow-x: auto !important;
+            margin-bottom: 22px !important;
+            padding-bottom: 10px !important;
+          }
+          .book-tab {
+            flex: 0 0 auto !important;
+            font-size: 16px !important;
+            padding: 0 4px 8px !important;
+          }
+          .book-grid {
+            grid-template-columns: 1fr !important;
+            gap: 18px !important;
+          }
+          .book-card { border-radius: 18px !important; }
+          .book-card-img { height: 150px !important; }
+          .book-card-content { padding: 16px !important; }
+          .book-card-name { font-size: 21px !important; }
+          .book-modal-overlay {
+            align-items: flex-end !important;
+            padding: 14px !important;
+          }
+          .book-modal {
+            width: 100% !important;
+            max-width: none !important;
+            padding: 24px 18px !important;
+            border-radius: 22px !important;
+          }
+          .book-modal-title { font-size: 24px !important; }
+          .book-modal-footer { flex-direction: column-reverse !important; }
+        }
+      `}</style>
       <ClientSidebar activePage="book" onNavigate={onNavigate} user={user} onLogout={onLogout} />
 
-      <main style={s.main}>
-        <header style={s.header}>
-          <h1 style={s.title}>Book Your Glow</h1>
-          <p style={s.subtitle}>Treat yourself to a signature experience.</p>
+      <main style={s.main} className="book-main">
+        <header style={s.header} className="book-header">
+          <h1 style={s.title} className="book-title">Book Your Glow</h1>
+          <p style={s.subtitle} className="book-subtitle">Treat yourself to a signature experience.</p>
         </header>
 
         <input
           type="text"
           placeholder="Search for a service..."
           style={s.searchBar}
+          className="book-search"
           onChange={handleSearchChange}
         />
 
-        <div style={s.tabs}>
+        <div style={s.tabs} className="book-tabs">
           {["All", "Skin", "Hair", "Body"].map(cat => (
-            <div key={cat} style={s.tab(activeTab === cat)} onClick={() => setActiveTab(cat)}>{cat}</div>
+            <div key={cat} style={s.tab(activeTab === cat)} className="book-tab" onClick={() => setActiveTab(cat)}>{cat}</div>
           ))}
         </div>
 
-        <div style={s.grid}>
+        <div style={s.grid} className="book-grid">
           {services.map(sv => (
-            <div key={sv.id} style={s.card}>
-              <img src={getServiceImage(sv)} alt={sv.name} style={s.cardImg} />
-              <div style={s.cardContent}>
-                <h3 style={s.cardName}>{sv.name}</h3>
+            <div key={sv.id} style={s.card} className="book-card">
+              <img src={getServiceImage(sv)} alt={sv.name} style={s.cardImg} className="book-card-img" />
+              <div style={s.cardContent} className="book-card-content">
+                <h3 style={s.cardName} className="book-card-name">{sv.name}</h3>
                 <StarRating />
                 <div style={s.cardPrice}>${sv.price} • {sv.duration} min</div>
                 <button style={s.bookBtn} onClick={() => setBookingService(sv)}>Book Appointment</button>
@@ -279,9 +329,9 @@ export default function BookAGlow({ onNavigate, user, onLogout, initialService, 
         </div>
 
         {bookingService && (
-          <div style={s.overlay} onClick={() => setBookingService(null)}>
-            <div style={s.modal} onClick={e => e.stopPropagation()}>
-              <h2 style={s.modalTitle}>Book {bookingService.name}</h2>
+          <div style={s.overlay} className="book-modal-overlay" onClick={() => setBookingService(null)}>
+            <div style={s.modal} className="book-modal" onClick={e => e.stopPropagation()}>
+              <h2 style={s.modalTitle} className="book-modal-title">Book {bookingService.name}</h2>
 
               <label style={{ display: 'block', marginBottom: 5, color: '#5f4a28', fontWeight: 700 }}>Select Date</label>
               <input
@@ -302,7 +352,7 @@ export default function BookAGlow({ onNavigate, user, onLogout, initialService, 
                 {timeOptions.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
 
-              <div style={s.modalFooter}>
+              <div style={s.modalFooter} className="book-modal-footer">
                 <button style={s.cancelBtn} onClick={() => setBookingService(null)}>Cancel</button>
                 <button style={s.confirmBtn} onClick={handleConfirm}>Confirm</button>
               </div>
