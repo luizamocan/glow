@@ -9,16 +9,23 @@ let clientToken;
 const asAdmin = (req) => req.set("Authorization", `Bearer ${adminToken}`);
 const asClient = (req) => req.set("Authorization", `Bearer ${clientToken}`);
 
+const loginWithOtp = async (email, password) => {
+  const challenge = await request(app).post("/api/auth/login").send({ email, password });
+  expect(challenge.status).toBe(202);
+  expect(challenge.body.requiresSecondFactor).toBe(true);
+
+  return request(app).post("/api/auth/login").send({
+    email,
+    password,
+    challengeId: challenge.body.challengeId,
+    oneTimeCode: challenge.body.oneTimeCode,
+  });
+};
+
 beforeEach(async () => {
   await store.reset();
-  const adminLogin = await request(app).post("/api/auth/login").send({
-    email: "admin@glowandshine.com",
-    password: "Admin@123",
-  });
-  const clientLogin = await request(app).post("/api/auth/login").send({
-    email: "client@glowandshine.com",
-    password: "Client@123",
-  });
+  const adminLogin = await loginWithOtp("admin@glowandshine.com", "Admin@123");
+  const clientLogin = await loginWithOtp("client@glowandshine.com", "Client@123");
   adminToken = adminLogin.body.token;
   clientToken = clientLogin.body.token;
 });
@@ -378,15 +385,54 @@ describe("Client persistence", () => {
 
 describe("DB-backed authentication", () => {
   test("logs in with the seeded admin account", async () => {
-    const res = await request(app).post("/api/auth/login").send({
-      email: "admin@glowandshine.com",
-      password: "Admin@123",
-    });
+    const res = await loginWithOtp("admin@glowandshine.com", "Admin@123");
 
     expect(res.status).toBe(200);
     expect(res.body.email).toBe("admin@glowandshine.com");
     expect(res.body.role).toBe("admin");
+    expect(res.body.permissions).toEqual(expect.arrayContaining(["services:create", "clients:manage"]));
+    expect(res.body.permissionScheme).toContain("admin:");
+    expect(res.body.authLevel).toBe("password+otp-or-recovery");
     expect(res.body.password).toBeUndefined();
+  });
+
+  test("can finish login with a recovery code instead of the one-time code", async () => {
+    const challenge = await request(app).post("/api/auth/login").send({
+      email: "client@glowandshine.com",
+      password: "Client@123",
+    });
+
+    const res = await request(app).post("/api/auth/login").send({
+      email: "client@glowandshine.com",
+      password: "Client@123",
+      challengeId: challenge.body.challengeId,
+      recoveryCode: challenge.body.recoveryCode,
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.roleName).toBe("user");
+    expect(res.body.permissions).toEqual(expect.arrayContaining(["appointments:create", "chat:use"]));
+  });
+
+  test("recovers a forgotten password with a reset token", async () => {
+    const recovery = await request(app).post("/api/auth/password-recovery/request").send({
+      email: "client@glowandshine.com",
+    });
+
+    expect(recovery.status).toBe(200);
+    expect(recovery.body.resetToken).toBeDefined();
+
+    const reset = await request(app).post("/api/auth/password-recovery/reset").send({
+      email: "client@glowandshine.com",
+      resetToken: recovery.body.resetToken,
+      newPassword: "NewClient@123",
+    });
+
+    expect(reset.status).toBe(200);
+
+    const login = await loginWithOtp("client@glowandshine.com", "NewClient@123");
+    expect(login.status).toBe(200);
+    expect(login.body.email).toBe("client@glowandshine.com");
   });
 
   test("registers a new client account in users and clients", async () => {
@@ -401,10 +447,7 @@ describe("DB-backed authentication", () => {
     expect(res.body.role).toBe("client");
     expect(res.body.clientId).toBeDefined();
 
-    const login = await request(app).post("/api/auth/login").send({
-      email: "mara@example.com",
-      password: "Client@123",
-    });
+    const login = await loginWithOtp("mara@example.com", "Client@123");
 
     expect(login.status).toBe(200);
     expect(login.body.email).toBe("mara@example.com");

@@ -24,6 +24,16 @@ npm start
 
 Open `https://CLIENT_LAN_IP:3000` from the browser. Because this is a development self-signed certificate, the browser may ask you to accept/trust it once.
 
+## Silver authentication flow
+
+Login is a two-step protected flow for every configured role:
+
+1. Submit email and password.
+2. Enter the generated one-time code, or use the displayed demo recovery code.
+3. The backend issues a signed bearer token containing the role, permission list, permission scheme, authentication level, session id and expiry.
+
+The seeded demo recovery codes are generated per user and look like `ADMIN-1-RECOVERY` and `USER-2-RECOVERY`. Password recovery is available from the login page through the `Forgot password?` action, which generates a demo reset token and lets you set a new strong password.
+
 ## Available Scripts
 
 In the project directory, you can run:

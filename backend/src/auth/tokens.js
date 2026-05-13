@@ -13,11 +13,14 @@ const sign = (payload) =>
 const issueToken = (user) => {
   const now = Date.now();
   const sessionId = crypto.randomUUID();
+  const permissions = user.permissions || [];
   const payload = {
     sub: user.id,
     email: user.email,
     role: user.roleName || user.role,
-    permissions: user.permissions || [],
+    permissions,
+    permissionScheme: `${user.roleName || user.role}:${permissions.join(",")}`,
+    authLevel: "password+otp-or-recovery",
     sid: sessionId,
     iat: Math.floor(now / 1000),
     exp: Math.floor((now + TOKEN_TTL_MS) / 1000),
@@ -33,11 +36,19 @@ const issueToken = (user) => {
     email: user.email,
     role: payload.role,
     permissions: payload.permissions,
+    permissionScheme: payload.permissionScheme,
+    authLevel: payload.authLevel,
     expiresAt: now + TOKEN_TTL_MS,
     lastActiveAt: now,
   });
 
-  return { token, expiresAt: new Date(now + TOKEN_TTL_MS).toISOString(), inactivityTimeoutMs: INACTIVITY_TIMEOUT_MS };
+  return {
+    token,
+    expiresAt: new Date(now + TOKEN_TTL_MS).toISOString(),
+    inactivityTimeoutMs: INACTIVITY_TIMEOUT_MS,
+    permissionScheme: payload.permissionScheme,
+    authLevel: payload.authLevel,
+  };
 };
 
 const verifyToken = (token) => {
@@ -64,6 +75,8 @@ const verifyToken = (token) => {
     roleName: payload.role,
     role: payload.role === "user" ? "client" : payload.role,
     permissions: payload.permissions || [],
+    permissionScheme: payload.permissionScheme,
+    authLevel: payload.authLevel,
     sessionId: payload.sid,
   };
 };
