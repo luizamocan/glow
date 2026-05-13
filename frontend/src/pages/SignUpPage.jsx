@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { s } from "./SignUpPage.styles";
-import { registerUser, validateEmail, validatePassword, USERS } from "../components/auth";
+import { registerUser, validateEmail, validatePassword } from "../components/auth";
 
 export default function SignUpPage({ onNavigate, onLoginSuccess }) {
   const [form, setForm] = useState({ name: "", phone: "", email: "", password: "", confirm: "" });
@@ -18,8 +18,6 @@ export default function SignUpPage({ onNavigate, onLoginSuccess }) {
     
     if (!form.email.trim()) newErrors.email = "Email is required";
     else if (!validateEmail(form.email)) newErrors.email = "Please enter a valid email address";
-    else if (USERS.find(u => u.email.toLowerCase() === form.email.toLowerCase()))
-      newErrors.email = "An account with this email already exists";
       
     if (!form.password.trim()) newErrors.password = "Password is required";
     else {
@@ -32,7 +30,17 @@ export default function SignUpPage({ onNavigate, onLoginSuccess }) {
     
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
     
-    const newUser = await registerUser(form.name.trim(), form.email.trim(), form.password, form.phone.trim());
+    let newUser = null;
+    try {
+      newUser = await registerUser(form.name.trim(), form.email.trim(), form.password, form.phone.trim());
+    } catch (_) {
+      setErrors({ general: "Secure server is unreachable. Check HTTPS/LAN connection." });
+      return;
+    }
+    if (!newUser) {
+      setErrors({ general: "Could not create account. The email may already be registered." });
+      return;
+    }
     onLoginSuccess(newUser);
   };
 
@@ -54,6 +62,12 @@ export default function SignUpPage({ onNavigate, onLoginSuccess }) {
         <h1 style={s.title}>Create your account</h1>
         <p style={s.subtitle}>Join Glow &amp; Shine today</p>
         <p style={s.tagline}>Timeless Beauty, Modern Touch</p>
+
+        {errors.general && (
+          <div style={{ background: "#fde8e8", border: "1px solid #e54949", borderRadius: 12, padding: "10px 16px", marginBottom: 16, color: "#e54949", fontSize: 15, fontFamily: "'Libre Bodoni', serif" }}>
+            {errors.general}
+          </div>
+        )}
 
         <label style={s.label}>Full Name</label>
         <input style={inputStyle("name")} placeholder="Lara Walker" value={form.name} onChange={set("name")} />

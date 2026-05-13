@@ -2,6 +2,28 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## HTTPS LAN lab run
+
+Run the backend on the server laptop/PC connected to the same hotspot or LAN as the client.
+
+```powershell
+cd backend
+npm run cert:windows
+$env:JWT_SECRET="replace-this-with-a-long-random-secret"
+npm start
+```
+
+The backend listens on `https://0.0.0.0:5000` when `backend/certs/server.pfx` exists. On the client machine, start the frontend with the backend machine IP:
+
+```powershell
+cd frontend
+$env:HTTPS="true"
+$env:REACT_APP_API_URL="https://BACKEND_LAN_IP:5000"
+npm start
+```
+
+Open `https://CLIENT_LAN_IP:3000` from the browser. Because this is a development self-signed certificate, the browser may ask you to accept/trust it once.
+
 ## Available Scripts
 
 In the project directory, you can run:

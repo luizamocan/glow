@@ -7,6 +7,7 @@ const Role = require("./Role");
 const Permission = require("./Permission");
 const ActionLog = require("./ActionLog");
 const ObservationList = require("./ObservationList");
+const { hashPassword, isPasswordHash } = require("../auth/passwords");
 
 Service.hasMany(Appointment, {
   foreignKey: "serviceId",
@@ -175,7 +176,13 @@ const seedDatabase = async () => {
 
   const userCount = await User.count();
   if (userCount === 0) {
-    await User.bulkCreate(seedUsers);
+    const users = await Promise.all(
+      seedUsers.map(async (user) => ({
+        ...user,
+        password: isPasswordHash(user.password) ? user.password : await hashPassword(user.password),
+      }))
+    );
+    await User.bulkCreate(users);
   }
 
   const roleCount = await Role.count();
