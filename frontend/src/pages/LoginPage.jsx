@@ -1,16 +1,11 @@
 import { useState } from "react";
 import { s } from "./LoginPage.styles";
-import { loginUser, requestPasswordRecovery, resetPassword, validateEmail, validatePassword } from "../components/auth";
+import { loginUser, validateEmail, validatePassword } from "../components/auth";
 import { getLastUser } from "../cookies";
 
 export default function LoginPage({ onNavigate, onLoginSuccess }) {
   const [email, setEmail] = useState(getLastUser() || "");
   const [password, setPassword] = useState("");
-  const [challenge, setChallenge] = useState(null);
-  const [oneTimeCode, setOneTimeCode] = useState("");
-  const [recoveryCode, setRecoveryCode] = useState("");
-  const [resetToken, setResetToken] = useState("");
-  const [newPassword, setNewPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false); 
   const [errors, setErrors] = useState({});
 
@@ -30,59 +25,18 @@ export default function LoginPage({ onNavigate, onLoginSuccess }) {
 
     let user = null;
     try {
-      user = await loginUser(email, password, challenge ? {
-        challengeId: challenge.challengeId,
-        oneTimeCode,
-        recoveryCode,
-      } : {});
+      user = await loginUser(email, password);
     } catch (_) {
       setErrors({ general: "Secure server is unreachable. Check HTTPS/LAN connection." });
       return;
     }
 
-    if (user?.requiresSecondFactor) {
-      setChallenge(user);
-      setErrors({ general: `Enter the one-time code ${user.oneTimeCode} or recovery code ${user.recoveryCode}` });
-      return;
-    }
-
-    if (!user?.token) {
+    if (!user) {
       setErrors({ general: "Invalid email or password" });
       return;
     }
 
     onLoginSuccess(user);
-  };
-
-  const handleRecoveryRequest = async () => {
-    if (!email.trim() || !validateEmail(email)) {
-      setErrors({ email: "Enter your account email first" });
-      return;
-    }
-
-    const recovery = await requestPasswordRecovery(email.trim());
-    if (!recovery) {
-      setErrors({ general: "Could not start password recovery" });
-      return;
-    }
-    setResetToken(recovery.resetToken || "");
-    setErrors({ general: `Recovery token generated: ${recovery.resetToken || "check server logs"}` });
-  };
-
-  const handlePasswordReset = async () => {
-    const pwErrors = validatePassword(newPassword);
-    if (!resetToken || pwErrors.length > 0) {
-      setErrors({ general: "Enter a recovery token and a strong new password" });
-      return;
-    }
-
-    const ok = await resetPassword(email.trim(), resetToken.trim(), newPassword);
-    setErrors({ general: ok ? "Password reset. Log in with the new password." : "Invalid or expired recovery token." });
-    if (ok) {
-      setPassword(newPassword);
-      setNewPassword("");
-      setResetToken("");
-    }
   };
 
   const errorText = (field) => errors[field]
@@ -165,28 +119,6 @@ export default function LoginPage({ onNavigate, onLoginSuccess }) {
         />
         {errorText("password")}
 
-        {challenge && (
-          <>
-            <label style={s.label} className="auth-label">One-time code</label>
-            <input
-              className="auth-input"
-              style={s.input}
-              placeholder="123456"
-              value={oneTimeCode}
-              onChange={(e) => setOneTimeCode(e.target.value)}
-            />
-
-            <label style={s.label} className="auth-label">Recovery code</label>
-            <input
-              className="auth-input"
-              style={s.input}
-              placeholder="USER-2-RECOVERY"
-              value={recoveryCode}
-              onChange={(e) => setRecoveryCode(e.target.value)}
-            />
-          </>
-        )}
-
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, marginBottom: 16 }}>
           <input
             type="checkbox"
@@ -203,23 +135,8 @@ export default function LoginPage({ onNavigate, onLoginSuccess }) {
         <button style={s.loginBtn} className="auth-login-btn" onClick={handleLogin}>Log in</button>
 
         <div style={s.forgotRow} className="auth-forgot-row">
-          <span style={s.forgot} className="auth-forgot" onClick={handleRecoveryRequest}>Forgot password?</span>
+          <span style={s.forgot} className="auth-forgot">Forgot password?</span>
         </div>
-
-        {resetToken && (
-          <div style={{ marginTop: -10, marginBottom: 16 }}>
-            <label style={s.label} className="auth-label">New password</label>
-            <input
-              className="auth-input"
-              style={s.input}
-              type="password"
-              placeholder="New strong password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
-            <button style={{ ...s.loginBtn, height: 46 }} className="auth-login-btn" onClick={handlePasswordReset}>Reset password</button>
-          </div>
-        )}
 
         <p style={s.signupRow} className="auth-signup-row">
           Don't you have an account?{" "}

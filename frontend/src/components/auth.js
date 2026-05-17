@@ -9,24 +9,16 @@ const withAvatar = (user) => ({
   avatar: user.role === "admin" ? PROFILE_PIC_ADMIN : PROFILE_PIC_CLIENT,
 });
 
-export const loginUser = async (email, password, secondFactor = {}) => {
+export const loginUser = async (email, password) => {
   const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password, ...secondFactor }),
+    body: JSON.stringify({ email, password }),
   });
 
   if (!response.ok) return null;
   const data = await response.json();
-  if (response.status === 202) return data;
-  return withAvatar({
-    ...data.user,
-    token: data.token,
-    expiresAt: data.expiresAt,
-    inactivityTimeoutMs: data.inactivityTimeoutMs,
-    permissionScheme: data.permissionScheme,
-    authLevel: data.authLevel,
-  });
+  return withAvatar({ ...data.user, token: data.token, expiresAt: data.expiresAt, inactivityTimeoutMs: data.inactivityTimeoutMs });
 };
 
 export const registerUser = async (name, email, password, phone = "") => {
@@ -38,36 +30,7 @@ export const registerUser = async (name, email, password, phone = "") => {
 
   if (!response.ok) return null;
   const data = await response.json();
-  return {
-    ...data.user,
-    token: data.token,
-    expiresAt: data.expiresAt,
-    inactivityTimeoutMs: data.inactivityTimeoutMs,
-    permissionScheme: data.permissionScheme,
-    authLevel: data.authLevel,
-    avatar: NEW_CLIENT,
-  };
-};
-
-export const requestPasswordRecovery = async (email) => {
-  const response = await fetch(`${API_BASE_URL}/api/auth/password-recovery/request`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
-  });
-
-  if (!response.ok) return null;
-  return response.json();
-};
-
-export const resetPassword = async (email, resetToken, newPassword) => {
-  const response = await fetch(`${API_BASE_URL}/api/auth/password-recovery/reset`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, resetToken, newPassword }),
-  });
-
-  return response.ok;
+  return { ...data.user, token: data.token, expiresAt: data.expiresAt, inactivityTimeoutMs: data.inactivityTimeoutMs, avatar: NEW_CLIENT };
 };
 
 export const validateEmail = (email) =>

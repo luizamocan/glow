@@ -1,12 +1,5 @@
 import { authHeaders } from "../api";
-import {
-  loginUser,
-  registerUser,
-  requestPasswordRecovery,
-  resetPassword,
-  validateEmail,
-  validatePassword,
-} from "../components/auth";
+import { loginUser, registerUser, validateEmail, validatePassword } from "../components/auth";
 
 beforeEach(() => {
   global.fetch = jest.fn();
@@ -42,52 +35,6 @@ describe("frontend authentication helpers", () => {
     expect(user.inactivityTimeoutMs).toBe(900000);
   });
 
-  test("login can return a second-factor challenge before issuing a token", async () => {
-    fetch.mockResolvedValueOnce({
-      ok: true,
-      status: 202,
-      json: async () => ({
-        requiresSecondFactor: true,
-        challengeId: "challenge-1",
-        oneTimeCode: "123456",
-        recoveryCode: "USER-2-RECOVERY",
-      }),
-    });
-
-    const challenge = await loginUser("client@glowandshine.com", "Client@123");
-
-    expect(challenge.requiresSecondFactor).toBe(true);
-    expect(challenge.challengeId).toBe("challenge-1");
-  });
-
-  test("login submits the one-time code challenge", async () => {
-    fetch.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        user: { id: 2, email: "client@glowandshine.com", role: "client" },
-        token: "signed-token",
-      }),
-    });
-
-    await loginUser("client@glowandshine.com", "Client@123", {
-      challengeId: "challenge-1",
-      oneTimeCode: "123456",
-    });
-
-    expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining("/api/auth/login"),
-      expect.objectContaining({
-        body: JSON.stringify({
-          email: "client@glowandshine.com",
-          password: "Client@123",
-          challengeId: "challenge-1",
-          oneTimeCode: "123456",
-        }),
-      })
-    );
-  });
-
   test("login returns null when the backend rejects credentials", async () => {
     fetch.mockResolvedValueOnce({ ok: false });
 
@@ -120,21 +67,6 @@ describe("frontend authentication helpers", () => {
       })
     );
     expect(user.token).toBe("new-token");
-  });
-
-  test("password recovery requests and resets through the backend", async () => {
-    fetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ resetToken: "reset-token" }),
-      })
-      .mockResolvedValueOnce({ ok: true });
-
-    const recovery = await requestPasswordRecovery("client@glowandshine.com");
-    const reset = await resetPassword("client@glowandshine.com", recovery.resetToken, "NewClient@123");
-
-    expect(recovery.resetToken).toBe("reset-token");
-    expect(reset).toBe(true);
   });
 
   test("authorization headers use bearer tokens instead of spoofable role headers", () => {
