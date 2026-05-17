@@ -58,11 +58,4 @@ const createClientUser = async ({ name, email, password, phone }) => {
   return getByEmail(email);
 };
 
-const updatePassword = async (id, password) => {
-  const user = await User.findByPk(id);
-  if (!user) return null;
-  await user.update({ password });
-  return withoutPassword(toPlain(user));
-};
-
-module.exports = { getByEmail, getByEmailWithPassword, createClientUser, updatePassword };
+module.exports = { getByEmail, getByEmailWithPassword, createClientUser };

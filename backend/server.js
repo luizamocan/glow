@@ -1,8 +1,5 @@
 
-const fs = require("fs");
 const http = require("http");
-const https = require("https");
-const path = require("path");
 const WebSocket = require("ws");
 const { faker } = require("@faker-js/faker");
 const store = require("./src/data/store");
@@ -11,41 +8,10 @@ const securityService = require("./src/services/securityService");
 const app = require("./src/app"); 
 const { syncDatabase } = require("./src/models");
 const { connectMongo, mongoUri } = require("./src/nosql/mongo");
-const PORT = process.env.PORT || 5000;
-const SSL_KEY_PATH = process.env.SSL_KEY_PATH || path.join(__dirname, "certs", "server.key");
-const SSL_CERT_PATH = process.env.SSL_CERT_PATH || path.join(__dirname, "certs", "server.crt");
-const SSL_PFX_PATH = process.env.SSL_PFX_PATH || path.join(__dirname, "certs", "server.pfx");
-const SSL_PFX_PASSPHRASE = process.env.SSL_PFX_PASSPHRASE || "glow-dev-cert";
+const PORT = 5000;
 
 
-const createServer = () => {
-    if (fs.existsSync(SSL_KEY_PATH) && fs.existsSync(SSL_CERT_PATH)) {
-        return {
-            server: https.createServer({
-                key: fs.readFileSync(SSL_KEY_PATH),
-                cert: fs.readFileSync(SSL_CERT_PATH),
-            }, app),
-            protocol: "https",
-            wsProtocol: "wss",
-        };
-    }
-
-    if (fs.existsSync(SSL_PFX_PATH)) {
-        return {
-            server: https.createServer({
-                pfx: fs.readFileSync(SSL_PFX_PATH),
-                passphrase: SSL_PFX_PASSPHRASE,
-            }, app),
-            protocol: "https",
-            wsProtocol: "wss",
-        };
-    }
-
-    console.warn("HTTPS certificate not found. Run npm run cert:windows or provide SSL_KEY_PATH/SSL_CERT_PATH for the lab demo.");
-    return { server: http.createServer(app), protocol: "http", wsProtocol: "ws" };
-};
-
-const { server, protocol, wsProtocol } = createServer();
+const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 let generationInterval = null;
@@ -130,8 +96,8 @@ syncDatabase().then(async () => {
         console.log(`
      Glow & Shine Server Ready
     ----------------------------
-    API: ${protocol}://0.0.0.0:${PORT}
-    WS:  ${wsProtocol}://0.0.0.0:${PORT}
+    API: http://0.0.0.0:${PORT}
+    WS:  ws://0.0.0.0:${PORT}
     `);
     });
 }).catch(error => {

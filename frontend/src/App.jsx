@@ -50,35 +50,9 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    if (currentUser?.token) {
-      fetch(`${API_BASE_URL}/api/auth/logout`, {
-        method: "POST",
-        headers: authHeaders(currentUser),
-      }).catch(() => {});
-    }
     setCurrentUser(null);
     navigate("home");
   };
-
-  useEffect(() => {
-    if (!currentUser) return undefined;
-
-    const timeoutMs = currentUser.inactivityTimeoutMs || 15 * 60 * 1000;
-    let timer;
-    const resetTimer = () => {
-      clearTimeout(timer);
-      timer = setTimeout(handleLogout, timeoutMs);
-    };
-
-    const events = ["click", "keydown", "mousemove", "touchstart"];
-    events.forEach((event) => window.addEventListener(event, resetTimer));
-    resetTimer();
-
-    return () => {
-      clearTimeout(timer);
-      events.forEach((event) => window.removeEventListener(event, resetTimer));
-    };
-  }, [currentUser]);
 
 
 

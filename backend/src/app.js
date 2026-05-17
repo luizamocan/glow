@@ -8,12 +8,10 @@ const chatRoutes = require("./routes/chatRoutes");
 const securityRoutes = require("./routes/securityRoutes");
 const activityRoutes = require("./routes/activityRoutes");
 const { actionLogger } = require("./services/securityService");
-const { optionalAuth } = require("./middleware/auth");
 const app = express();
 
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors());
 app.use(express.json());
-app.use(optionalAuth);
 app.use(actionLogger);
 
 

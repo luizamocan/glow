@@ -2,17 +2,16 @@ const express = require("express");
 const router  = express.Router();
 const ctrl    = require("../controllers/serviceController");
 const { getServiceAppointments, getServiceAppointmentCount, updateAppointmentStatus } = require("../controllers/serviceController");
-const { requirePermission } = require("../middleware/auth");
 
-router.get   ("/statistics", requirePermission("statistics:read"), ctrl.getStatistics);
+router.get   ("/statistics", ctrl.getStatistics);
 router.get   ("/",           ctrl.getAllServices);
 router.get   ("/:id",        ctrl.getServiceById);
-router.post  ("/",           requirePermission("services:create"), ctrl.createService);
-router.put   ("/:id",        requirePermission("services:update"), ctrl.updateService);
-router.delete("/:id",        requirePermission("services:delete"), ctrl.deleteService);
+router.post  ("/",           ctrl.createService);
+router.put   ("/:id",        ctrl.updateService);
+router.delete("/:id",        ctrl.deleteService);
 
-router.get ("/:id/appointments", requirePermission("appointments:read"), getServiceAppointments);
-router.get ("/:id/appointment-count", requirePermission("appointments:read"), getServiceAppointmentCount);
-router.put ("/:id/appointments/:appId/status", requirePermission("appointments:update"), updateAppointmentStatus);
+router.get ("/:id/appointments", getServiceAppointments);
+router.get ("/:id/appointment-count", getServiceAppointmentCount);
+router.put ("/:id/appointments/:appId/status", updateAppointmentStatus);
 
 module.exports = router;

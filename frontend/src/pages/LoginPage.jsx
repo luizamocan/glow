@@ -23,14 +23,7 @@ export default function LoginPage({ onNavigate, onLoginSuccess }) {
 
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
 
-    let user = null;
-    try {
-      user = await loginUser(email, password);
-    } catch (_) {
-      setErrors({ general: "Secure server is unreachable. Check HTTPS/LAN connection." });
-      return;
-    }
-
+    const user = await loginUser(email, password);
     if (!user) {
       setErrors({ general: "Invalid email or password" });
       return;
