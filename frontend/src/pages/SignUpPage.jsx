@@ -32,8 +32,12 @@ export default function SignUpPage({ onNavigate, onLoginSuccess }) {
     
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
     
-    const newUser = await registerUser(form.name.trim(), form.email.trim(), form.password, form.phone.trim());
-    onLoginSuccess(newUser);
+    try {
+      const newUser = await registerUser(form.name.trim(), form.email.trim(), form.password, form.phone.trim());
+      onLoginSuccess(newUser);
+    } catch (error) {
+      setErrors({ general: error.message });
+    }
   };
 
   const inputStyle = (field) => ({ ...s.input, ...(errors[field] ? { border: "1.5px solid #e54949" } : {}) });
@@ -54,6 +58,12 @@ export default function SignUpPage({ onNavigate, onLoginSuccess }) {
         <h1 style={s.title}>Create your account</h1>
         <p style={s.subtitle}>Join Glow &amp; Shine today</p>
         <p style={s.tagline}>Timeless Beauty, Modern Touch</p>
+
+        {errors.general && (
+          <div style={{ background: "#fde8e8", border: "1px solid #e54949", borderRadius: 12, padding: "10px 16px", marginBottom: 16, color: "#e54949", fontSize: 15, fontFamily: "'Libre Bodoni', serif" }}>
+            {errors.general}
+          </div>
+        )}
 
         <label style={s.label}>Full Name</label>
         <input style={inputStyle("name")} placeholder="Lara Walker" value={form.name} onChange={set("name")} />

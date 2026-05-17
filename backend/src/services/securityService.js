@@ -14,9 +14,9 @@ const getIdentity = ({ userId, userEmail, ipAddress }) => {
 };
 
 const getRequestUser = (req, res) => ({
-  userId: res?.locals?.securityUser?.userId || (req.headers["x-user-id"] ? Number(req.headers["x-user-id"]) : null),
-  userEmail: res?.locals?.securityUser?.userEmail || req.headers["x-user-email"] || req.body?.email || req.body?.userEmail || req.query?.email || null,
-  groupId: res?.locals?.securityUser?.groupId || req.headers["x-user-role"] || req.headers["x-user-group"] || "anonymous",
+  userId: res?.locals?.securityUser?.userId || null,
+  userEmail: res?.locals?.securityUser?.userEmail || req.body?.email || req.body?.userEmail || req.query?.email || null,
+  groupId: res?.locals?.securityUser?.groupId || "anonymous",
 });
 
 const actionFromRequest = (req) => {

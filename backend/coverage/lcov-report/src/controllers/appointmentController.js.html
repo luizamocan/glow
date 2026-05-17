@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">85.71% </span>
+                <span class="strong">82.14% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>18/21</span>
+                <span class='fraction'>23/28</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">56.25% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>4/8</span>
+                <span class='fraction'>9/16</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">95.83% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>18/18</span>
+                <span class='fraction'>23/24</span>
             </div>
         
             
@@ -107,23 +107,18 @@
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
@@ -131,6 +126,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -141,26 +141,21 @@
 const { validateAppointment } = require("../validators/appointmentValidator");
 &nbsp;
 const getAppointments = async (req, res) =&gt; {
-  const email = req.query.email;
+  const isAdmin = req.user?.role === "admin";
+  const email = isAdmin ? <span class="branch-0 cbranch-no" title="branch not covered" >req.query.email </span>: req.user.email;
   const data = email ? await store.getByEmail(email) : <span class="branch-1 cbranch-no" title="branch not covered" >await store.getAll();</span>
   res.json(data);
 };
 &nbsp;
 const createAppointment = async (req, res) =&gt; {
-  const errors = validateAppointment(req.body);
+  const appointmentData = {
+    ...req.body,
+    userEmail: req.user.email,
+  };
+  const errors = validateAppointment(appointmentData);
   <span class="missing-if-branch" title="if path not taken" >I</span>if (errors.length &gt; 0) <span class="cstat-no" title="statement not covered" >return res.status(400).json({ errors });</span>
 &nbsp;
-  const newApp = await store.create({
-    service: req.body.service,
-    serviceId: req.body.serviceId,
-    clientId: req.body.clientId,
-    clientName: req.body.clientName,
-    clientPhone: req.body.clientPhone,
-    date: req.body.date,
-    time: req.body.time,
-    price: req.body.price,
-    userEmail: req.body.userEmail
-  });
+  const newApp = await store.create(appointmentData);
   <span class="missing-if-branch" title="if path not taken" >I</span>if (!newApp) <span class="cstat-no" title="statement not covered" >return res.status(404).json({ error: "Service not found" });</span>
 &nbsp;
   res.status(201).json(newApp);
@@ -168,6 +163,11 @@ const createAppointment = async (req, res) =&gt; {
 &nbsp;
 const cancelAppointment = async (req, res) =&gt; {
   const id = parseInt(req.params.id);
+  const appointment = await store.getById(id);
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (!appointment) <span class="cstat-no" title="statement not covered" >return res.status(404).json({ error: "Appointment not found" });</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (req.user.role !== "admin" &amp;&amp; appointment.userEmail !== req.user.email) {
+<span class="cstat-no" title="statement not covered" >    return res.status(403).json({ error: "You can only cancel your own appointments" });</span>
+  }
   const deleted = await store.remove(id);
   <span class="missing-if-branch" title="if path not taken" >I</span>if (!deleted) <span class="cstat-no" title="statement not covered" >return res.status(404).json({ error: "Appointment not found" });</span>
   res.status(204).send();
@@ -181,7 +181,7 @@ module.exports = { getAppointments, createAppointment, cancelAppointment };
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-05T14:18:27.108Z
+                at 2026-05-17T13:58:13.604Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

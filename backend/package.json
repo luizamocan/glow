@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "cert": "powershell -ExecutionPolicy Bypass -File scripts\\create-dev-cert.ps1",
     "migrate": "node scripts/migrate.js",
     "test": "jest --coverage"
   },

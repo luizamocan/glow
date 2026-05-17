@@ -1,5 +1,8 @@
 
 const http = require("http");
+const https = require("https");
+const fs = require("fs");
+const path = require("path");
 const WebSocket = require("ws");
 const { faker } = require("@faker-js/faker");
 const store = require("./src/data/store");
@@ -8,10 +11,25 @@ const securityService = require("./src/services/securityService");
 const app = require("./src/app"); 
 const { syncDatabase } = require("./src/models");
 const { connectMongo, mongoUri } = require("./src/nosql/mongo");
-const PORT = 5000;
+const { authenticateToken, requireRole } = require("./src/middleware/authMiddleware");
+const PORT = Number(process.env.PORT || 5000);
+const HOST = process.env.HOST || "0.0.0.0";
+const CERT_DIR = path.join(__dirname, "certs");
+const HTTPS_KEY_PATH = process.env.HTTPS_KEY_PATH || path.join(CERT_DIR, "localhost-key.pem");
+const HTTPS_CERT_PATH = process.env.HTTPS_CERT_PATH || path.join(CERT_DIR, "localhost-cert.pem");
+const HTTPS_PFX_PATH = process.env.HTTPS_PFX_PATH || path.join(CERT_DIR, "localhost.pfx");
 
 
-const server = http.createServer(app);
+const hasPemCert = fs.existsSync(HTTPS_KEY_PATH) && fs.existsSync(HTTPS_CERT_PATH);
+const hasPfxCert = fs.existsSync(HTTPS_PFX_PATH);
+const httpsOptions = hasPemCert
+    ? { key: fs.readFileSync(HTTPS_KEY_PATH), cert: fs.readFileSync(HTTPS_CERT_PATH) }
+    : hasPfxCert
+        ? { pfx: fs.readFileSync(HTTPS_PFX_PATH), passphrase: process.env.HTTPS_PFX_PASSPHRASE || "" }
+        : null;
+const server = httpsOptions ? https.createServer(httpsOptions, app) : http.createServer(app);
+const protocol = httpsOptions ? "https" : "http";
+const wsProtocol = httpsOptions ? "wss" : "ws";
 const wss = new WebSocket.Server({ server });
 
 let generationInterval = null;
@@ -48,7 +66,7 @@ wss.on("connection", (socket) => {
                     length: savedMessage.text.length
                 },
                 method: "WEBSOCKET",
-                endpoint: "ws://chat",
+                endpoint: `${wsProtocol}://chat`,
             });
             broadcast({ type: "CHAT_MESSAGE", payload: savedMessage });
         }
@@ -69,7 +87,7 @@ const generateRandomServices = async () => {
 };
 
 
-app.post('/api/admin/start-gen', (req, res) => {
+app.post('/api/admin/start-gen', authenticateToken, requireRole("admin"), (req, res) => {
     if (generationInterval) return res.status(400).json({ error: "Running" });
     
     generationInterval = setInterval(generateRandomServices, 5000);
@@ -77,7 +95,7 @@ app.post('/api/admin/start-gen', (req, res) => {
     res.json({ message: "Started" });
 });
 
-app.post('/api/admin/stop-gen', (req, res) => {
+app.post('/api/admin/stop-gen', authenticateToken, requireRole("admin"), (req, res) => {
     clearInterval(generationInterval);
     generationInterval = null;
     console.log(">>> Generator Stopped");
@@ -92,12 +110,13 @@ syncDatabase().then(async () => {
         console.warn(`NoSQL: MongoDB not connected (${error.message})`);
     }
 
-    server.listen(PORT, "0.0.0.0", () => {
+    server.listen(PORT, HOST, () => {
         console.log(`
      Glow & Shine Server Ready
     ----------------------------
-    API: http://0.0.0.0:${PORT}
-    WS:  ws://0.0.0.0:${PORT}
+    API: ${protocol}://${HOST}:${PORT}
+    WS:  ${wsProtocol}://${HOST}:${PORT}
+    HTTPS: ${httpsOptions ? "enabled" : "missing certs, using HTTP fallback"}
     `);
     });
 }).catch(error => {

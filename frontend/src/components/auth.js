@@ -2,6 +2,7 @@ import PROFILE_PIC_CLIENT from "../assets/profile_pic.png";
 import PROFILE_PIC_ADMIN from "../assets/client.jpg";
 import NEW_CLIENT from "../assets/client-avatar.jpg";
 import { API_BASE_URL } from "../config";
+import { saveSession } from "../api";
 const DEFAULT_USERS = [
   {
     id: 1,
@@ -22,8 +23,7 @@ const DEFAULT_USERS = [
 ];
 
 
-const savedUsers = localStorage.getItem("glow_users");
-export const USERS = savedUsers ? JSON.parse(savedUsers) : DEFAULT_USERS;
+export const USERS = DEFAULT_USERS;
 
 const withAvatar = (user) => ({
   ...user,
@@ -31,55 +31,43 @@ const withAvatar = (user) => ({
 });
 
 export const loginUser = async (email, password) => {
+  let response;
   try {
-    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+    response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-
-    if (response.ok) {
-      return withAvatar(await response.json());
-    }
   } catch (_) {
-    // Keep local fallback for offline development.
+    return null;
   }
 
-  const user = USERS.find(
-    (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
-  );
-  return user ? withAvatar(user) : null;
+  if (!response.ok) {
+    return null;
+  }
+
+  const session = await response.json();
+  const user = withAvatar({ ...session.user, token: session.token });
+  saveSession({ ...session, user });
+  return user;
 };
 
 export const registerUser = async (name, email, password, phone = "") => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, phone }),
-    });
+  const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password, phone }),
+  });
 
-    if (response.ok) {
-      return { ...(await response.json()), avatar: NEW_CLIENT };
-    }
-  } catch (_) {
-    // Keep local fallback for offline development.
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || "Registration failed");
   }
 
-  const newUser = {
-    id: Date.now(),
-    email,
-    password,
-    name,
-    role: "client",
-    avatar: NEW_CLIENT,
-  };
-  
-
-  USERS.push(newUser);
-  localStorage.setItem("glow_users", JSON.stringify(USERS));
-  
-  return newUser;
+  const session = await response.json();
+  const user = { ...session.user, token: session.token, avatar: NEW_CLIENT };
+  saveSession({ ...session, user });
+  return user;
 };
 
 export const validateEmail = (email) =>

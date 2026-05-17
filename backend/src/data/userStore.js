@@ -42,6 +42,10 @@ const getByEmailWithPassword = async (email) =>
 
 const getByEmail = async (email) => withoutPassword(await getByEmailWithPassword(email));
 
+const updatePassword = async (id, password) => {
+  await User.update({ password }, { where: { id } });
+};
+
 const createClientUser = async ({ name, email, password, phone }) => {
   const client = await Client.create({ name, email, phone });
   const user = await User.create({
@@ -58,4 +62,4 @@ const createClientUser = async ({ name, email, password, phone }) => {
   return getByEmail(email);
 };
 
-module.exports = { getByEmail, getByEmailWithPassword, createClientUser };
+module.exports = { getByEmail, getByEmailWithPassword, createClientUser, updatePassword };

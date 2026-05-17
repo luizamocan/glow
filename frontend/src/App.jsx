@@ -11,8 +11,10 @@ import GlowHistory from "./pages/GlowHistory";
 import ProfilePage from "./pages/ProfilePage";
 import SecurityLogsPage from "./pages/SecurityLogsPage";
 import ChatWidget from "./components/ChatWidget";
-import { authHeaders } from "./api";
+import { authHeaders, clearSession, getSession, saveSession } from "./api";
 import { API_BASE_URL, WS_BASE_URL } from "./config";
+
+const INACTIVITY_LIMIT_MS = Number(process.env.REACT_APP_INACTIVITY_LIMIT_MS || 10 * 60 * 1000);
 
 const INITIAL_SERVICES = [
   { id: 1, name: "Facial",          price: "$50",  duration: "60 minutes",  description: "Deep skin cleansing treatment",              image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80" },
@@ -29,7 +31,7 @@ const INITIAL_SERVICES = [
 export default function App() {
   const [page, setPage] = useState("home");
   const [services, setServices] = useState(INITIAL_SERVICES);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(() => getSession()?.user || null);
   const [selectedService, setSelectedService] = useState(null);
   const [appointments, setAppointments] = useState([
   { id: 1, service: "Manicure", date: "2024-03-10", time: "11:15 AM", price: "$30", status: "Completed", rating: 5, userEmail: "client@test.com" },
@@ -50,9 +52,36 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    clearSession();
     setCurrentUser(null);
     navigate("home");
   };
+
+useEffect(() => {
+  if (!currentUser) return undefined;
+
+  let timeoutId;
+  const logoutForInactivity = () => {
+    clearSession();
+    setCurrentUser(null);
+    setPage("login");
+  };
+  const markActivity = () => {
+    const session = getSession();
+    if (!session) return logoutForInactivity();
+    saveSession({ ...session, lastActivityAt: new Date().toISOString() });
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(logoutForInactivity, INACTIVITY_LIMIT_MS);
+  };
+  const events = ["click", "keydown", "mousemove", "touchstart", "scroll"];
+  events.forEach((eventName) => window.addEventListener(eventName, markActivity, { passive: true }));
+  markActivity();
+
+  return () => {
+    clearTimeout(timeoutId);
+    events.forEach((eventName) => window.removeEventListener(eventName, markActivity));
+  };
+}, [currentUser]);
 
 
 
@@ -232,8 +261,20 @@ useEffect(() => {
     </>
   );
 
+  const isAdmin = currentUser?.role === "admin";
+  const isClient = currentUser?.role === "client";
+
   if (page === "login")       return <LoginPage      onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
   if (page === "signup")      return <SignUpPage     onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
+  if (!currentUser && ["services", "statistics", "security", "client-home", "book", "history", "profile"].includes(page)) {
+    return <LoginPage onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
+  }
+  if (["services", "statistics", "security"].includes(page) && !isAdmin) {
+    return withChat(<ClientDashboard onNavigate={navigate} user={currentUser} services={services} onLogout={handleLogout} />);
+  }
+  if (["client-home", "book", "history", "profile"].includes(page) && !isClient && currentUser) {
+    return withChat(<ServicesPage onNavigate={navigate} services={services} setServices={setServices} onLogout={handleLogout} user={currentUser} />);
+  }
   if (page === "services")    return withChat(<ServicesPage   onNavigate={navigate} services={services} setServices={setServices} onLogout={handleLogout} user={currentUser} />);
   if (page === "statistics")  return withChat(<StatisticsPage onNavigate={navigate} services={services} onLogout={handleLogout} user={currentUser} />);
   if (page === "security")  return withChat(<SecurityLogsPage onNavigate={navigate} onLogout={handleLogout} user={currentUser} />);

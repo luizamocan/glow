@@ -2,6 +2,72 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Secure LAN Lab Run
+
+1. Find the backend machine IP on the hotspot/LAN:
+
+   ```powershell
+   ipconfig
+   ```
+
+   Example: `172.20.10.5`.
+
+2. Generate a local HTTPS certificate for that IP:
+
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File backend\scripts\create-dev-cert.ps1 -IpAddress 172.20.10.5
+   ```
+
+3. Start the backend on the server machine:
+
+   ```powershell
+   cd backend
+   npm.cmd start
+   ```
+
+   It should print `API: https://0.0.0.0:5000` and `WS: wss://0.0.0.0:5000`.
+
+4. Start the frontend on the client machine or the same machine for phone testing:
+
+   ```powershell
+   cd frontend
+   $env:REACT_APP_API_URL="https://172.20.10.5:5000"
+   npm.cmd run start:https
+   ```
+
+5. Open the app on the phone/client:
+
+   ```text
+   https://172.20.10.5:3000
+   ```
+
+   Because the certificate is self-signed, the browser may ask you to accept a privacy warning once for the frontend and once for `https://172.20.10.5:5000`.
+
+## Authentication
+
+- Passwords are stored as PBKDF2 hashes.
+- Login/register responses return a signed token.
+- Protected API requests use `Authorization: Bearer <token>`.
+- Admin routes reject client tokens.
+- Client appointment routes use the email from the token, not spoofable headers.
+- The frontend logs the user out after inactivity.
+
+## Tests
+
+Backend:
+
+```powershell
+cd backend
+npm.cmd test -- --runInBand
+```
+
+Frontend:
+
+```powershell
+cd frontend
+npm.cmd test -- --watchAll=false
+```
+
 ## Available Scripts
 
 In the project directory, you can run:

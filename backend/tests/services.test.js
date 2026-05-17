@@ -3,8 +3,21 @@ const app     = require("../src/app");
 const store   = require("../src/data/store");
 const { Service, sequelize } = require("../src/models");
 
+let adminAuth;
+let clientAuth;
+
 beforeEach(async () => {
   await store.reset();
+  const adminLogin = await request(app).post("/api/auth/login").send({
+    email: "admin@glowandshine.com",
+    password: "Admin@123",
+  });
+  const clientLogin = await request(app).post("/api/auth/login").send({
+    email: "client@glowandshine.com",
+    password: "Client@123",
+  });
+  adminAuth = `Bearer ${adminLogin.body.token}`;
+  clientAuth = `Bearer ${clientLogin.body.token}`;
 });
 
 afterAll(async () => {
@@ -62,7 +75,7 @@ describe("GET /api/services/:id", () => {
 
 describe("POST /api/services", () => {
   test("creates a new service", async () => {
-    const res = await request(app).post("/api/services").send({
+    const res = await request(app).post("/api/services").set("Authorization", adminAuth).send({
       name: "Waxing", price: 30, duration: 20, description: "Full waxing"
     });
     expect(res.status).toBe(201);
@@ -71,43 +84,43 @@ describe("POST /api/services", () => {
   });
 
   test("rejects missing name", async () => {
-    const res = await request(app).post("/api/services").send({ price: 30, duration: 20 });
+    const res = await request(app).post("/api/services").set("Authorization", adminAuth).send({ price: 30, duration: 20 });
     expect(res.status).toBe(400);
     expect(res.body.errors).toBeDefined();
   });
 
   test("rejects negative price", async () => {
-    const res = await request(app).post("/api/services").send({ name: "Waxing", price: -10, duration: 20 });
+    const res = await request(app).post("/api/services").set("Authorization", adminAuth).send({ name: "Waxing", price: -10, duration: 20 });
     expect(res.status).toBe(400);
   });
 
   test("rejects zero price", async () => {
-    const res = await request(app).post("/api/services").send({ name: "Waxing", price: 0, duration: 20 });
+    const res = await request(app).post("/api/services").set("Authorization", adminAuth).send({ name: "Waxing", price: 0, duration: 20 });
     expect(res.status).toBe(400);
   });
 
   test("rejects decimal price", async () => {
-    const res = await request(app).post("/api/services").send({ name: "Waxing", price: 9.99, duration: 20 });
+    const res = await request(app).post("/api/services").set("Authorization", adminAuth).send({ name: "Waxing", price: 9.99, duration: 20 });
     expect(res.status).toBe(400);
   });
 
   test("rejects duration over 480", async () => {
-    const res = await request(app).post("/api/services").send({ name: "Waxing", price: 30, duration: 500 });
+    const res = await request(app).post("/api/services").set("Authorization", adminAuth).send({ name: "Waxing", price: 30, duration: 500 });
     expect(res.status).toBe(400);
   });
 
   test("rejects duplicate name", async () => {
-    const res = await request(app).post("/api/services").send({ name: "Facial", price: 30, duration: 20 });
+    const res = await request(app).post("/api/services").set("Authorization", adminAuth).send({ name: "Facial", price: 30, duration: 20 });
     expect(res.status).toBe(409);
   });
 
   test("rejects name with numbers", async () => {
-    const res = await request(app).post("/api/services").send({ name: "Facial123", price: 30, duration: 20 });
+    const res = await request(app).post("/api/services").set("Authorization", adminAuth).send({ name: "Facial123", price: 30, duration: 20 });
     expect(res.status).toBe(400);
   });
 
   test("rejects description over 200 chars", async () => {
-    const res = await request(app).post("/api/services").send({
+    const res = await request(app).post("/api/services").set("Authorization", adminAuth).send({
       name: "Waxing", price: 30, duration: 20, description: "A".repeat(201)
     });
     expect(res.status).toBe(400);
@@ -116,54 +129,54 @@ describe("POST /api/services", () => {
 
 describe("PUT /api/services/:id", () => {
   test("updates a service", async () => {
-    const res = await request(app).put("/api/services/1").send({ price: 60 });
+    const res = await request(app).put("/api/services/1").set("Authorization", adminAuth).send({ price: 60 });
     expect(res.status).toBe(200);
     expect(res.body.price).toBe(60);
   });
 
   test("returns 404 for non-existent id", async () => {
-    const res = await request(app).put("/api/services/999").send({ price: 60 });
+    const res = await request(app).put("/api/services/999").set("Authorization", adminAuth).send({ price: 60 });
     expect(res.status).toBe(404);
   });
 
   test("rejects invalid price on update", async () => {
-    const res = await request(app).put("/api/services/1").send({ price: -5 });
+    const res = await request(app).put("/api/services/1").set("Authorization", adminAuth).send({ price: -5 });
     expect(res.status).toBe(400);
   });
 
   test("rejects duplicate name on update", async () => {
-    const res = await request(app).put("/api/services/1").send({ name: "Haircut" });
+    const res = await request(app).put("/api/services/1").set("Authorization", adminAuth).send({ name: "Haircut" });
     expect(res.status).toBe(409);
   });
 
   test("allows same name on same service", async () => {
-    const res = await request(app).put("/api/services/1").send({ name: "Facial", price: 60 });
+    const res = await request(app).put("/api/services/1").set("Authorization", adminAuth).send({ name: "Facial", price: 60 });
     expect(res.status).toBe(200);
   });
 });
 
 describe("DELETE /api/services/:id", () => {
   test("deletes a service", async () => {
-    const res = await request(app).delete("/api/services/1");
+    const res = await request(app).delete("/api/services/1").set("Authorization", adminAuth);
     expect(res.status).toBe(204);
     const check = await request(app).get("/api/services/1");
     expect(check.status).toBe(404);
   });
 
   test("returns 404 for non-existent id", async () => {
-    const res = await request(app).delete("/api/services/999");
+    const res = await request(app).delete("/api/services/999").set("Authorization", adminAuth);
     expect(res.status).toBe(404);
   });
 
   test("returns 400 for invalid id", async () => {
-    const res = await request(app).delete("/api/services/abc");
+    const res = await request(app).delete("/api/services/abc").set("Authorization", adminAuth);
     expect(res.status).toBe(400);
   });
 });
 
 describe("GET /api/services/statistics", () => {
   test("returns statistics", async () => {
-    const res = await request(app).get("/api/services/statistics");
+    const res = await request(app).get("/api/services/statistics").set("Authorization", adminAuth);
     expect(res.status).toBe(200);
     expect(res.body.total).toBe(8);
     expect(res.body.avgPrice).toBeDefined();
@@ -172,13 +185,13 @@ describe("GET /api/services/statistics", () => {
   });
 
   test("price tiers add up to total", async () => {
-    const res = await request(app).get("/api/services/statistics");
+    const res = await request(app).get("/api/services/statistics").set("Authorization", adminAuth);
     const { low, medium, high } = res.body.priceTiers;
     expect(low + medium + high).toBe(res.body.total);
   });
 
   test("duration buckets add up to total", async () => {
-    const res = await request(app).get("/api/services/statistics");
+    const res = await request(app).get("/api/services/statistics").set("Authorization", adminAuth);
     const buckets = Object.values(res.body.durationBuckets);
     expect(buckets.reduce((a, b) => a + b, 0)).toBe(res.body.total);
   });
@@ -192,7 +205,7 @@ describe("Global Error Handlers & Edge Cases", () => {
   });
 
   test("rejects name longer than 50 characters", async () => {
-    const res = await request(app).post("/api/services").send({
+    const res = await request(app).post("/api/services").set("Authorization", adminAuth).send({
       name: "A".repeat(51),
       price: 50,
       duration: 30
@@ -201,7 +214,7 @@ describe("Global Error Handlers & Edge Cases", () => {
   });
 
   test("rejects name shorter than 3 characters", async () => {
-    const res = await request(app).post("/api/services").send({
+    const res = await request(app).post("/api/services").set("Authorization", adminAuth).send({
       name: "Ab",
       price: 50,
       duration: 30
@@ -211,7 +224,7 @@ describe("Global Error Handlers & Edge Cases", () => {
 
   test("statistics returns 0 total if store is empty", async () => {
     await Service.destroy({ where: {} });
-    const res = await request(app).get("/api/services/statistics");
+    const res = await request(app).get("/api/services/statistics").set("Authorization", adminAuth);
     expect(res.status).toBe(200);
     expect(res.body.total).toBe(0);
   });
@@ -219,7 +232,7 @@ describe("Global Error Handlers & Edge Cases", () => {
 
 describe("Appointment persistence and relational queries", () => {
   test("creates an appointment linked to an existing service", async () => {
-    const res = await request(app).post("/api/appointments").send({
+    const res = await request(app).post("/api/appointments").set("Authorization", clientAuth).send({
       service: "Facial",
       serviceId: 1,
       date: "2026-05-10",
@@ -232,12 +245,12 @@ describe("Appointment persistence and relational queries", () => {
     expect(res.body.id).toBeDefined();
     expect(res.body.serviceId).toBe(1);
     expect(res.body.service).toBe("Facial");
-    expect(res.body.userEmail).toBe("client@example.com");
+    expect(res.body.userEmail).toBe("client@glowandshine.com");
     expect(res.body.status).toBe("Upcoming");
   });
 
   test("filters appointments by email", async () => {
-    await request(app).post("/api/appointments").send({
+    await request(app).post("/api/appointments").set("Authorization", clientAuth).send({
       service: "Facial",
       serviceId: 1,
       date: "2026-05-10",
@@ -246,15 +259,15 @@ describe("Appointment persistence and relational queries", () => {
       userEmail: "client@example.com",
     });
 
-    const res = await request(app).get("/api/appointments?email=client@example.com");
+    const res = await request(app).get("/api/appointments?email=client@example.com").set("Authorization", clientAuth);
 
     expect(res.status).toBe(200);
-    expect(res.body).toHaveLength(1);
-    expect(res.body[0].userEmail).toBe("client@example.com");
+    expect(res.body).toHaveLength(2);
+    expect(res.body[0].userEmail).toBe("client@glowandshine.com");
   });
 
   test("counts and updates appointments for a service", async () => {
-    const created = await request(app).post("/api/appointments").send({
+    const created = await request(app).post("/api/appointments").set("Authorization", clientAuth).send({
       service: "Facial",
       serviceId: 1,
       date: "2026-05-10",
@@ -263,12 +276,13 @@ describe("Appointment persistence and relational queries", () => {
       userEmail: "client@example.com",
     });
 
-    const count = await request(app).get("/api/services/1/appointment-count");
+    const count = await request(app).get("/api/services/1/appointment-count").set("Authorization", adminAuth);
     expect(count.status).toBe(200);
     expect(count.body.count).toBe(1);
 
     const updated = await request(app)
       .put(`/api/services/1/appointments/${created.body.id}/status`)
+      .set("Authorization", adminAuth)
       .send({ status: "Completed" });
 
     expect(updated.status).toBe(200);
@@ -276,7 +290,7 @@ describe("Appointment persistence and relational queries", () => {
   });
 
   test("deletes an appointment", async () => {
-    const created = await request(app).post("/api/appointments").send({
+    const created = await request(app).post("/api/appointments").set("Authorization", clientAuth).send({
       service: "Facial",
       serviceId: 1,
       date: "2026-05-10",
@@ -285,24 +299,24 @@ describe("Appointment persistence and relational queries", () => {
       userEmail: "client@example.com",
     });
 
-    const deleted = await request(app).delete(`/api/appointments/${created.body.id}`);
+    const deleted = await request(app).delete(`/api/appointments/${created.body.id}`).set("Authorization", clientAuth);
     expect(deleted.status).toBe(204);
 
-    const res = await request(app).get("/api/appointments?email=client@example.com");
-    expect(res.body).toHaveLength(0);
+    const res = await request(app).get("/api/appointments?email=client@example.com").set("Authorization", clientAuth);
+    expect(res.body).toHaveLength(1);
   });
 });
 
 describe("Client persistence", () => {
   test("returns paginated clients", async () => {
-    const res = await request(app).get("/api/clients");
+    const res = await request(app).get("/api/clients").set("Authorization", adminAuth);
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveLength(1);
     expect(res.body.pagination.total).toBe(1);
   });
 
   test("creates a client", async () => {
-    const res = await request(app).post("/api/clients").send({
+    const res = await request(app).post("/api/clients").set("Authorization", adminAuth).send({
       name: "Ana Pop",
       email: "ana@example.com",
       phone: "0711111111",
@@ -314,25 +328,26 @@ describe("Client persistence", () => {
   });
 
   test("filters clients by search", async () => {
-    await request(app).post("/api/clients").send({
+    await request(app).post("/api/clients").set("Authorization", adminAuth).send({
       name: "Ana Pop",
       email: "ana@example.com",
     });
 
-    const res = await request(app).get("/api/clients?search=ana");
+    const res = await request(app).get("/api/clients?search=ana").set("Authorization", adminAuth);
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveLength(1);
     expect(res.body.data[0].name).toBe("Ana Pop");
   });
 
   test("updates a client", async () => {
-    const created = await request(app).post("/api/clients").send({
+    const created = await request(app).post("/api/clients").set("Authorization", adminAuth).send({
       name: "Ana Pop",
       email: "ana@example.com",
     });
 
     const res = await request(app)
       .put(`/api/clients/${created.body.id}`)
+      .set("Authorization", adminAuth)
       .send({ phone: "0722222222" });
 
     expect(res.status).toBe(200);
@@ -340,20 +355,20 @@ describe("Client persistence", () => {
   });
 
   test("deletes a client", async () => {
-    const created = await request(app).post("/api/clients").send({
+    const created = await request(app).post("/api/clients").set("Authorization", adminAuth).send({
       name: "Ana Pop",
       email: "ana@example.com",
     });
 
-    const deleted = await request(app).delete(`/api/clients/${created.body.id}`);
+    const deleted = await request(app).delete(`/api/clients/${created.body.id}`).set("Authorization", adminAuth);
     expect(deleted.status).toBe(204);
 
-    const check = await request(app).get(`/api/clients/${created.body.id}`);
+    const check = await request(app).get(`/api/clients/${created.body.id}`).set("Authorization", adminAuth);
     expect(check.status).toBe(404);
   });
 
   test("rejects duplicate client email", async () => {
-    const res = await request(app).post("/api/clients").send({
+    const res = await request(app).post("/api/clients").set("Authorization", adminAuth).send({
       name: "Another Client",
       email: "client@glowandshine.com",
     });
@@ -370,9 +385,10 @@ describe("DB-backed authentication", () => {
     });
 
     expect(res.status).toBe(200);
-    expect(res.body.email).toBe("admin@glowandshine.com");
-    expect(res.body.role).toBe("admin");
-    expect(res.body.password).toBeUndefined();
+    expect(res.body.token).toBeDefined();
+    expect(res.body.user.email).toBe("admin@glowandshine.com");
+    expect(res.body.user.role).toBe("admin");
+    expect(res.body.user.password).toBeUndefined();
   });
 
   test("registers a new client account in users and clients", async () => {
@@ -384,8 +400,9 @@ describe("DB-backed authentication", () => {
     });
 
     expect(res.status).toBe(201);
-    expect(res.body.role).toBe("client");
-    expect(res.body.clientId).toBeDefined();
+    expect(res.body.token).toBeDefined();
+    expect(res.body.user.role).toBe("client");
+    expect(res.body.user.clientId).toBeDefined();
 
     const login = await request(app).post("/api/auth/login").send({
       email: "mara@example.com",
@@ -393,7 +410,34 @@ describe("DB-backed authentication", () => {
     });
 
     expect(login.status).toBe(200);
-    expect(login.body.email).toBe("mara@example.com");
+    expect(login.body.user.email).toBe("mara@example.com");
+  });
+
+  test("rejects protected admin routes without a token", async () => {
+    const res = await request(app).post("/api/services").send({
+      name: "Waxing",
+      price: 30,
+      duration: 20,
+    });
+
+    expect(res.status).toBe(401);
+  });
+
+  test("rejects client tokens on admin routes", async () => {
+    const res = await request(app)
+      .post("/api/services")
+      .set("Authorization", clientAuth)
+      .send({ name: "Waxing", price: 30, duration: 20 });
+
+    expect(res.status).toBe(403);
+  });
+
+  test("rejects invalid tokens", async () => {
+    const res = await request(app)
+      .get("/api/security/logs")
+      .set("Authorization", "Bearer invalid.token.value");
+
+    expect(res.status).toBe(401);
   });
 });
 
