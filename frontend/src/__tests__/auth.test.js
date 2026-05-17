@@ -1,5 +1,13 @@
 import { authHeaders, clearSession, getSession } from "../api";
-import { loginUser, registerUser, validateEmail, validatePassword } from "../components/auth";
+import {
+  googleLoginUser,
+  loginUser,
+  registerUser,
+  requestPasswordReset,
+  resetPassword,
+  validateEmail,
+  validatePassword,
+} from "../components/auth";
 
 beforeEach(() => {
   clearSession();
@@ -89,5 +97,37 @@ describe("authentication helpers", () => {
     await expect(registerUser("Client", "client@example.com", "Client@123")).rejects.toThrow(
       "An account with this email already exists"
     );
+  });
+
+  test("google login stores the normal app token", async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => authPayload,
+    });
+
+    const user = await googleLoginUser("google-id-token");
+
+    expect(fetch).toHaveBeenCalledWith(expect.stringContaining("/api/auth/google"), expect.objectContaining({
+      method: "POST",
+    }));
+    expect(user.email).toBe("client@example.com");
+    expect(getSession().token).toBe("signed-token");
+  });
+
+  test("requests and consumes a password reset token", async () => {
+    fetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ resetToken: "reset-code" }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ message: "Password reset successfully" }),
+      });
+
+    await expect(requestPasswordReset("client@example.com")).resolves.toEqual({ resetToken: "reset-code" });
+    await expect(resetPassword("reset-code", "Client@456")).resolves.toEqual({
+      message: "Password reset successfully",
+    });
   });
 });

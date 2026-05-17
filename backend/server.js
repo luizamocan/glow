@@ -11,7 +11,7 @@ const securityService = require("./src/services/securityService");
 const app = require("./src/app"); 
 const { syncDatabase } = require("./src/models");
 const { connectMongo, mongoUri } = require("./src/nosql/mongo");
-const { authenticateToken, requireRole } = require("./src/middleware/authMiddleware");
+const { authenticateToken, requirePermission } = require("./src/middleware/authMiddleware");
 const PORT = Number(process.env.PORT || 5000);
 const HOST = process.env.HOST || "0.0.0.0";
 const CERT_DIR = path.join(__dirname, "certs");
@@ -87,7 +87,7 @@ const generateRandomServices = async () => {
 };
 
 
-app.post('/api/admin/start-gen', authenticateToken, requireRole("admin"), (req, res) => {
+app.post('/api/admin/start-gen', authenticateToken, requirePermission("statistics:read"), (req, res) => {
     if (generationInterval) return res.status(400).json({ error: "Running" });
     
     generationInterval = setInterval(generateRandomServices, 5000);
@@ -95,7 +95,7 @@ app.post('/api/admin/start-gen', authenticateToken, requireRole("admin"), (req, 
     res.json({ message: "Started" });
 });
 
-app.post('/api/admin/stop-gen', authenticateToken, requireRole("admin"), (req, res) => {
+app.post('/api/admin/stop-gen', authenticateToken, requirePermission("statistics:read"), (req, res) => {
     clearInterval(generationInterval);
     generationInterval = null;
     console.log(">>> Generator Stopped");

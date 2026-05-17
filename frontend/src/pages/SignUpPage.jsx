@@ -3,7 +3,7 @@ import { s } from "./SignUpPage.styles";
 import { registerUser, validateEmail, validatePassword, USERS } from "../components/auth";
 
 export default function SignUpPage({ onNavigate, onLoginSuccess }) {
-  const [form, setForm] = useState({ name: "", phone: "", email: "", password: "", confirm: "" });
+  const [form, setForm] = useState({ name: "", username: "", phone: "", email: "", password: "", confirm: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
@@ -12,6 +12,9 @@ export default function SignUpPage({ onNavigate, onLoginSuccess }) {
     const newErrors = {};
     if (!form.name.trim()) newErrors.name = "Full name is required";
     else if (form.name.trim().length < 2) newErrors.name = "Name must be at least 2 characters";
+
+    if (!form.username.trim()) newErrors.username = "Username is required";
+    else if (!/^[a-zA-Z0-9_]{3,30}$/.test(form.username.trim())) newErrors.username = "Use 3-30 letters, numbers or underscores";
     
     if (!form.phone.trim()) newErrors.phone = "Phone is required";
     else if (!/^\+?[0-9]{7,15}$/.test(form.phone.trim())) newErrors.phone = "Please enter a valid phone number";
@@ -33,7 +36,7 @@ export default function SignUpPage({ onNavigate, onLoginSuccess }) {
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
     
     try {
-      const newUser = await registerUser(form.name.trim(), form.email.trim(), form.password, form.phone.trim());
+      const newUser = await registerUser(form.name.trim(), form.email.trim(), form.password, form.phone.trim(), form.username.trim());
       onLoginSuccess(newUser);
     } catch (error) {
       setErrors({ general: error.message });
@@ -68,6 +71,10 @@ export default function SignUpPage({ onNavigate, onLoginSuccess }) {
         <label style={s.label}>Full Name</label>
         <input style={inputStyle("name")} placeholder="Lara Walker" value={form.name} onChange={set("name")} />
         {errorText("name")}
+
+        <label style={s.label}>Username</label>
+        <input style={inputStyle("username")} placeholder="lara_walker" value={form.username} onChange={set("username")} />
+        {errorText("username")}
 
         <label style={s.label}>Phone</label>
         <input style={inputStyle("phone")} placeholder="+40734782335" value={form.phone} onChange={set("phone")} />

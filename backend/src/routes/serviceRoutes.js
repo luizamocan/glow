@@ -2,17 +2,17 @@ const express = require("express");
 const router  = express.Router();
 const ctrl    = require("../controllers/serviceController");
 const { getServiceAppointments, getServiceAppointmentCount, updateAppointmentStatus } = require("../controllers/serviceController");
-const { authenticateToken, requireRole } = require("../middleware/authMiddleware");
+const { authenticateToken, requirePermission } = require("../middleware/authMiddleware");
 
-router.get   ("/statistics", authenticateToken, requireRole("admin"), ctrl.getStatistics);
+router.get   ("/statistics", authenticateToken, requirePermission("statistics:read"), ctrl.getStatistics);
 router.get   ("/",           ctrl.getAllServices);
 router.get   ("/:id",        ctrl.getServiceById);
-router.post  ("/",           authenticateToken, requireRole("admin"), ctrl.createService);
-router.put   ("/:id",        authenticateToken, requireRole("admin"), ctrl.updateService);
-router.delete("/:id",        authenticateToken, requireRole("admin"), ctrl.deleteService);
+router.post  ("/",           authenticateToken, requirePermission("services:create"), ctrl.createService);
+router.put   ("/:id",        authenticateToken, requirePermission("services:update"), ctrl.updateService);
+router.delete("/:id",        authenticateToken, requirePermission("services:delete"), ctrl.deleteService);
 
-router.get ("/:id/appointments", authenticateToken, requireRole("admin"), getServiceAppointments);
-router.get ("/:id/appointment-count", authenticateToken, requireRole("admin"), getServiceAppointmentCount);
-router.put ("/:id/appointments/:appId/status", authenticateToken, requireRole("admin"), updateAppointmentStatus);
+router.get ("/:id/appointments", authenticateToken, requirePermission("appointments:read"), getServiceAppointments);
+router.get ("/:id/appointment-count", authenticateToken, requirePermission("appointments:read"), getServiceAppointmentCount);
+router.put ("/:id/appointments/:appId/status", authenticateToken, requirePermission("appointments:update"), updateAppointmentStatus);
 
 module.exports = router;

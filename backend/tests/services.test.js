@@ -388,7 +388,20 @@ describe("DB-backed authentication", () => {
     expect(res.body.token).toBeDefined();
     expect(res.body.user.email).toBe("admin@glowandshine.com");
     expect(res.body.user.role).toBe("admin");
+    expect(res.body.user.permissions).toContain("security:read");
     expect(res.body.user.password).toBeUndefined();
+  });
+
+  test("logs in with a seeded username", async () => {
+    const res = await request(app).post("/api/auth/login").send({
+      identifier: "client",
+      password: "Client@123",
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.token).toBeDefined();
+    expect(res.body.user.email).toBe("client@glowandshine.com");
+    expect(res.body.user.permissions).toContain("appointments:create");
   });
 
   test("registers a new client account in users and clients", async () => {
@@ -413,6 +426,55 @@ describe("DB-backed authentication", () => {
     expect(login.body.user.email).toBe("mara@example.com");
   });
 
+  test("returns the active user from /me with a valid token", async () => {
+    const res = await request(app).get("/api/auth/me").set("Authorization", clientAuth);
+
+    expect(res.status).toBe(200);
+    expect(res.body.email).toBe("client@glowandshine.com");
+    expect(res.body.password).toBeUndefined();
+  });
+
+  test("logs in with demo Google authentication and creates a client user", async () => {
+    const res = await request(app).post("/api/auth/google").send({
+      credential: "test-google:google-mara@example.com",
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.token).toBeDefined();
+    expect(res.body.user.email).toBe("google-mara@example.com");
+    expect(res.body.user.role).toBe("client");
+  });
+
+  test("resets password with a generated recovery token", async () => {
+    const forgot = await request(app).post("/api/auth/forgot-password").send({
+      email: "client@glowandshine.com",
+    });
+
+    expect(forgot.status).toBe(200);
+    expect(forgot.body.resetToken).toBeDefined();
+
+    const reset = await request(app).post("/api/auth/reset-password").send({
+      token: forgot.body.resetToken,
+      password: "Client@456",
+    });
+    expect(reset.status).toBe(200);
+
+    const login = await request(app).post("/api/auth/login").send({
+      identifier: "client",
+      password: "Client@456",
+    });
+    expect(login.status).toBe(200);
+  });
+
+  test("rejects invalid password reset tokens", async () => {
+    const res = await request(app).post("/api/auth/reset-password").send({
+      token: "missing",
+      password: "Client@456",
+    });
+
+    expect(res.status).toBe(400);
+  });
+
   test("rejects protected admin routes without a token", async () => {
     const res = await request(app).post("/api/services").send({
       name: "Waxing",
@@ -428,6 +490,12 @@ describe("DB-backed authentication", () => {
       .post("/api/services")
       .set("Authorization", clientAuth)
       .send({ name: "Waxing", price: 30, duration: 20 });
+
+    expect(res.status).toBe(403);
+  });
+
+  test("rejects client tokens on security logs by permission", async () => {
+    const res = await request(app).get("/api/security/logs").set("Authorization", clientAuth);
 
     expect(res.status).toBe(403);
   });

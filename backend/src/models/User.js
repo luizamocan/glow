@@ -19,9 +19,24 @@ const User = sequelize.define(
       unique: true,
       validate: { isEmail: true },
     },
+    username: {
+      type: DataTypes.STRING(60),
+      allowNull: true,
+    },
     password: {
       type: DataTypes.STRING(120),
+      allowNull: true,
+    },
+    googleId: {
+      type: DataTypes.STRING(120),
+      allowNull: true,
+      field: "google_id",
+    },
+    authProvider: {
+      type: DataTypes.ENUM("local", "google"),
       allowNull: false,
+      defaultValue: "local",
+      field: "auth_provider",
     },
     role: {
       type: DataTypes.ENUM("admin", "client"),

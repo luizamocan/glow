@@ -48,9 +48,31 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 - Passwords are stored as PBKDF2 hashes.
 - Login/register responses return a signed token.
 - Protected API requests use `Authorization: Bearer <token>`.
-- Admin routes reject client tokens.
+- Tokens contain the user's role and permission scheme.
+- Admin routes reject client tokens by permission checks.
 - Client appointment routes use the email from the token, not spoofable headers.
 - The frontend logs the user out after inactivity.
+
+## Silver Authentication Demo
+
+The app supports three authentication methods:
+
+```text
+1. Email + password
+2. Username + password
+3. Demo Google account login
+```
+
+Seeded accounts:
+
+```text
+Admin email:    admin@glowandshine.com / Admin@123
+Admin username: admin / Admin@123
+Client email:   client@glowandshine.com / Client@123
+Client username: client / Client@123
+```
+
+Password recovery is available from the login page. For the lab demo, the backend returns a reset code directly so it can be shown without configuring real email delivery.
 
 ## Tests
 

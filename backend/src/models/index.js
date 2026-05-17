@@ -123,7 +123,9 @@ const seedUsers = [
     id: 1,
     name: "Luiza Mocan",
     email: "admin@glowandshine.com",
+    username: "admin",
     password: "Admin@123",
+    authProvider: "local",
     role: "admin",
     clientId: null,
   },
@@ -131,7 +133,9 @@ const seedUsers = [
     id: 2,
     name: "Luiza Mocan",
     email: "client@glowandshine.com",
+    username: "client",
     password: "Client@123",
+    authProvider: "local",
     role: "client",
     clientId: 1,
   },
@@ -155,6 +159,7 @@ const seedPermissions = [
   { id: 10, code: "clients:manage", description: "Create, update, and delete clients" },
   { id: 11, code: "statistics:read", description: "View statistics" },
   { id: 12, code: "chat:use", description: "Use real-time chat" },
+  { id: 13, code: "security:read", description: "View security logs and observations" },
 ];
 
 const seedRolePermissions = {
@@ -168,24 +173,30 @@ const seedDatabase = async () => {
     await Service.bulkCreate(seedServices);
   }
 
-  const clientCount = await Client.count();
-  if (clientCount === 0) {
-    await Client.bulkCreate(seedClients);
+  for (const seedClient of seedClients) {
+    await Client.findOrCreate({ where: { email: seedClient.email }, defaults: seedClient });
   }
 
-  const userCount = await User.count();
-  if (userCount === 0) {
-    await User.bulkCreate(seedUsers);
+  for (const seedUser of seedUsers) {
+    const [user, created] = await User.findOrCreate({
+      where: { email: seedUser.email },
+      defaults: seedUser,
+    });
+    if (!created) {
+      await user.update({
+        username: user.username || seedUser.username,
+        authProvider: user.authProvider || seedUser.authProvider,
+        clientId: user.clientId === undefined ? seedUser.clientId : user.clientId,
+      });
+    }
   }
 
-  const roleCount = await Role.count();
-  if (roleCount === 0) {
-    await Role.bulkCreate(seedRoles);
+  for (const role of seedRoles) {
+    await Role.findOrCreate({ where: { name: role.name }, defaults: role });
   }
 
-  const permissionCount = await Permission.count();
-  if (permissionCount === 0) {
-    await Permission.bulkCreate(seedPermissions);
+  for (const permission of seedPermissions) {
+    await Permission.findOrCreate({ where: { code: permission.code }, defaults: permission });
   }
 
   const [adminUser, clientUser, adminRole, userRole, permissions] = await Promise.all([
@@ -213,8 +224,46 @@ const seedDatabase = async () => {
   }
 };
 
+const ensureUserAuthColumns = async () => {
+  const queryInterface = sequelize.getQueryInterface();
+  const tables = await queryInterface.showAllTables();
+  if (!tables.includes("users")) return;
+
+  const columns = await queryInterface.describeTable("users");
+  if (!columns.username) {
+    await queryInterface.addColumn("users", "username", {
+      type: "VARCHAR(60)",
+      allowNull: true,
+    });
+  }
+  if (!columns.google_id) {
+    await queryInterface.addColumn("users", "google_id", {
+      type: "VARCHAR(120)",
+      allowNull: true,
+    });
+  }
+  if (!columns.auth_provider) {
+    await queryInterface.addColumn("users", "auth_provider", {
+      type: "VARCHAR(20)",
+      allowNull: false,
+      defaultValue: "local",
+    });
+  }
+};
+
+const resetRoleJoinTables = async () => {
+  const queryInterface = sequelize.getQueryInterface();
+  await queryInterface.dropTable("role_permissions").catch(() => {});
+  await queryInterface.dropTable("user_roles").catch(() => {});
+  await sequelize.sync();
+};
+
 const syncDatabase = async ({ force = false, seed = true } = {}) => {
   await sequelize.sync({ force });
+  if (!force) {
+    await ensureUserAuthColumns();
+    await resetRoleJoinTables();
+  }
   if (seed) {
     await seedDatabase();
   }

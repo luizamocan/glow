@@ -30,13 +30,13 @@ const withAvatar = (user) => ({
   avatar: user.role === "admin" ? PROFILE_PIC_ADMIN : PROFILE_PIC_CLIENT,
 });
 
-export const loginUser = async (email, password) => {
+export const loginUser = async (identifier, password) => {
   let response;
   try {
     response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ identifier, password }),
     });
   } catch (_) {
     return null;
@@ -52,11 +52,11 @@ export const loginUser = async (email, password) => {
   return user;
 };
 
-export const registerUser = async (name, email, password, phone = "") => {
+export const registerUser = async (name, email, password, phone = "", username = "") => {
   const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, password, phone }),
+    body: JSON.stringify({ name, email, password, phone, username }),
   });
 
   if (!response.ok) {
@@ -68,6 +68,47 @@ export const registerUser = async (name, email, password, phone = "") => {
   const user = { ...session.user, token: session.token, avatar: NEW_CLIENT };
   saveSession({ ...session, user });
   return user;
+};
+
+export const googleLoginUser = async (credential) => {
+  const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ credential }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || "Google login failed");
+  }
+
+  const session = await response.json();
+  const user = withAvatar({ ...session.user, token: session.token });
+  saveSession({ ...session, user });
+  return user;
+};
+
+export const requestPasswordReset = async (email) => {
+  const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  if (!response.ok) throw new Error("Could not request password reset");
+  return response.json();
+};
+
+export const resetPassword = async (token, password) => {
+  const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, password }),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || "Password reset failed");
+  }
+  return response.json();
 };
 
 export const validateEmail = (email) =>
