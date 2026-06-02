@@ -16,5 +16,14 @@
     "role": "user",
     "text": "hello",
     "createdAt": "2026-05-05T08:12:21.271Z"
+  },
+  {
+    "id": "1780409005816-03e2d5765e278",
+    "userId": 1,
+    "userName": "Luiza Mocan",
+    "userEmail": "admin@glowandshine.com",
+    "role": "admin",
+    "text": "Hi",
+    "createdAt": "2026-06-02T14:03:25.816Z"
   }
 ]

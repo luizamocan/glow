@@ -74,6 +74,17 @@ Client username: client / Client@123
 
 Password recovery is available from the login page. For the lab demo, the backend returns a reset code directly so it can be shown without configuring real email delivery.
 
+To send password recovery through Gmail, create a Gmail App Password and start the backend with:
+
+```powershell
+$env:SMTP_HOST="smtp.gmail.com"
+$env:SMTP_PORT="465"
+$env:SMTP_USER="your_email@gmail.com"
+$env:SMTP_PASS="your_16_character_app_password"
+$env:SMTP_FROM="Glow & Shine <your_email@gmail.com>"
+npm.cmd start
+```
+
 ## Tests
 
 Backend:

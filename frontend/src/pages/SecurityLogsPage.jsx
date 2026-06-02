@@ -68,12 +68,12 @@ export default function SecurityLogsPage({ onNavigate, onLogout, user }) {
   return (
     <div style={s.page} className="page-enter">
       <Sidebar activePage="security" onNavigate={onNavigate} onLogout={onLogout} />
-      <main style={s.main}>
+      <main style={s.main} className="security-main">
         <h1 style={s.title}>Security Logs</h1>
         <p style={s.subtitle}>Persisted backend action logs and users currently placed under observation.</p>
         <button style={s.refresh} onClick={loadSecurityData}>{loading ? "Loading..." : "Refresh"}</button>
 
-        <div style={s.grid}>
+        <div style={s.grid} className="security-grid">
           <div style={s.metric}>
             <div style={s.metricValue}>{logs.length}</div>
             <div style={s.metricLabel}>Recent persisted actions</div>
@@ -84,9 +84,9 @@ export default function SecurityLogsPage({ onNavigate, onLogout, user }) {
           </div>
         </div>
 
-        <section style={s.panel}>
+        <section style={s.panel} className="security-panel">
           <div style={s.panelTitle}>Observation List</div>
-          <div style={s.tableWrap}>
+          <div style={s.tableWrap} className="responsive-table-card">
             <table style={s.table}>
               <thead>
                 <tr>
@@ -114,9 +114,9 @@ export default function SecurityLogsPage({ onNavigate, onLogout, user }) {
           </div>
         </section>
 
-        <section style={s.panel}>
+        <section style={s.panel} className="security-panel">
           <div style={s.panelTitle}>Action Log</div>
-          <div style={s.tableWrap}>
+          <div style={s.tableWrap} className="responsive-table-card">
             <table style={s.table}>
               <thead>
                 <tr>

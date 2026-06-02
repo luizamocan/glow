@@ -82,7 +82,7 @@ export default function GlowHistory({ onNavigate, user, onLogout, appointments, 
     <div style={s.page}>
       <ClientSidebar activePage="history" onNavigate={onNavigate} user={user} onLogout={onLogout} />
       
-      <main style={s.main}>
+      <main style={s.main} className="history-main">
         <header style={s.header}>
           <h1 style={s.title}>My Glow History</h1>
           <p style={s.subtitle}>Review your past transformations and look forward to your next shine.</p>
@@ -92,7 +92,7 @@ export default function GlowHistory({ onNavigate, user, onLogout, appointments, 
           <h2 style={s.sectionTitle}>Upcoming Glows</h2>
           <div style={s.list}>
             {futureGlows.length > 0 ? futureGlows.map(app => (
-              <div key={app.id} style={s.appointmentCard(true)}>
+              <div key={app.id} style={s.appointmentCard(true)} className="appointment-card">
                 <div style={s.infoGroup}>
                   <div style={s.serviceName}>{app.service}</div>
                   <div style={s.dateText}>{app.date} at {app.time}</div>
@@ -116,7 +116,7 @@ export default function GlowHistory({ onNavigate, user, onLogout, appointments, 
           <h2 style={s.sectionTitle}>Past Glows</h2>
           <div style={s.list}>
             {pastGlows.length > 0 ? pastGlows.map(app => (
-              <div key={app.id} style={s.appointmentCard(false)}>
+              <div key={app.id} style={s.appointmentCard(false)} className="appointment-card">
                 <div style={s.infoGroup}>
                   <div style={s.serviceName}>{app.service}</div>
                   <div style={s.dateText}>{app.date}</div>

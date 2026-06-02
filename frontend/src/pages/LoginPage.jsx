@@ -94,9 +94,7 @@ export default function LoginPage({ onNavigate, onLoginSuccess }) {
       setResetToken(result.resetToken || "");
       setMode("reset");
       setErrors({
-        general: result.resetToken
-          ? `Demo reset code: ${result.resetToken}`
-          : "If the email exists, a reset code was generated.",
+        general: "If the email exists, reset instructions were sent. Check your Gmail inbox.",
       });
     } catch (error) {
       setErrors({ general: error.message });

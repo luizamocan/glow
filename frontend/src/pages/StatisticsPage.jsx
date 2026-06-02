@@ -284,8 +284,8 @@ export default function StatisticsPage({ onNavigate, onLogout, services, user })
 
         <div style={s.sectionTitle}>Business Analytics</div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <div style={s.toggleRow}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }} className="statistics-controls">
+          <div style={s.toggleRow} className="statistics-toggle-row">
             <button
               style={view === "chart" ? s.toggleActive : s.toggleInactive}
               onClick={() => setView("chart")}
@@ -300,7 +300,7 @@ export default function StatisticsPage({ onNavigate, onLogout, services, user })
             </button>
           </div>
 
-          <div style={{ display: 'flex', gap: 12 }}>
+          <div style={{ display: 'flex', gap: 12 }} className="statistics-generator-row">
             <button
               onClick={handleStartGenerator}
               style={{ background: '#5f4a28', color: '#ffe5bd', padding: '10px 18px', borderRadius: 20, border: 'none', cursor: 'pointer', fontWeight: 700, fontFamily: "'Libre Bodoni', serif" }}
@@ -348,7 +348,7 @@ export default function StatisticsPage({ onNavigate, onLogout, services, user })
             </div>
           </div>
         ) : (
-          <TabularView services={services} />
+          <div className="responsive-table-card"><TabularView services={services} /></div>
         )}
       </main>
     </div>

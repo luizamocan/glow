@@ -118,14 +118,16 @@ describe("authentication helpers", () => {
     fetch
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ resetToken: "reset-code" }),
+        json: async () => ({ message: "If the email exists, reset instructions were sent." }),
       })
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({ message: "Password reset successfully" }),
       });
 
-    await expect(requestPasswordReset("client@example.com")).resolves.toEqual({ resetToken: "reset-code" });
+    await expect(requestPasswordReset("client@example.com")).resolves.toEqual({
+      message: "If the email exists, reset instructions were sent.",
+    });
     await expect(resetPassword("reset-code", "Client@456")).resolves.toEqual({
       message: "Password reset successfully",
     });

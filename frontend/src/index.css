@@ -5,3 +5,252 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  min-height: 100%;
+}
+
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .sidebar-desktop {
+    display: none !important;
+  }
+
+  .mobile-nav {
+    display: flex !important;
+  }
+
+  main,
+  .main-content,
+  .book-main {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding: 18px 14px 104px !important;
+  }
+
+  .page-enter,
+  .auth-page {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  table {
+    min-width: 620px;
+  }
+
+  .responsive-table-card {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .services-section-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .table-card,
+  [style*="overflow-x"] {
+    max-width: 100%;
+  }
+
+  main > div,
+  section {
+    max-width: 100%;
+  }
+
+  .modal-overlay {
+    align-items: flex-end !important;
+    padding: 12px !important;
+    z-index: 10000 !important;
+  }
+
+  .modal-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: calc(100vh - 28px) !important;
+    overflow-y: auto !important;
+    padding: 24px 18px !important;
+    border-radius: 18px !important;
+  }
+
+  .modal-content h3 {
+    font-size: 24px !important;
+  }
+
+  .modal-content input,
+  .modal-content textarea,
+  .modal-content button {
+    font-size: 16px !important;
+  }
+
+  .chat-launcher {
+    right: 14px !important;
+    bottom: 88px !important;
+    width: 52px !important;
+    height: 52px !important;
+    z-index: 10001 !important;
+  }
+
+  .chat-panel {
+    left: 10px !important;
+    right: 10px !important;
+    bottom: 150px !important;
+    width: auto !important;
+    max-width: none !important;
+    height: min(430px, calc(100vh - 180px)) !important;
+    z-index: 10001 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content > div[style*="height: 180px"],
+  .book-main > div[style*="height: 180px"] {
+    height: 150px !important;
+    margin-top: 6px !important;
+    margin-bottom: 18px !important;
+    border-radius: 16px !important;
+  }
+
+  .main-content [style*="font-size: 36px"],
+  .book-main [style*="font-size: 36px"] {
+    font-size: 26px !important;
+    line-height: 1.15 !important;
+  }
+
+  .main-content [style*="padding: 0 36px"] {
+    padding: 0 18px !important;
+  }
+
+  .main-content [style*="top: 16px"][style*="right: 16px"] {
+    display: none !important;
+  }
+
+  .main-content [style*="display: flex"][style*="justify-content: space-between"] {
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .main-content button,
+  .book-main button {
+    min-height: 40px;
+  }
+
+  .main-content input,
+  .book-main input,
+  .book-main select {
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content div[style*="gap: 40px"] {
+    gap: 16px !important;
+  }
+
+  .main-content div[style*="width: 110px"][style*="height: 110px"],
+  .mood-circle {
+    width: 74px !important;
+    height: 74px !important;
+  }
+
+  .mood-circle img {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .service-card-hover {
+    flex: 1 1 150px !important;
+    min-width: 145px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .book-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .book-tabs {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .book-modal {
+    width: 100% !important;
+    max-height: calc(100vh - 28px) !important;
+    overflow-y: auto !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-container {
+    flex-direction: column !important;
+    gap: 18px !important;
+  }
+
+  .profile-side-card,
+  .profile-content-area,
+  .profile-info-card {
+    width: 100% !important;
+    flex: 1 1 auto !important;
+  }
+
+  .profile-side-card,
+  .profile-info-card {
+    padding: 20px !important;
+    border-radius: 16px !important;
+  }
+
+  .profile-stats-row {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .profile-stat-box {
+    width: 100% !important;
+  }
+
+  .appointment-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
+    padding: 18px !important;
+    border-radius: 16px !important;
+  }
+
+  .appointment-card > div:last-child {
+    width: 100% !important;
+    align-items: flex-start !important;
+  }
+
+  .statistics-controls,
+  .statistics-toggle-row,
+  .statistics-generator-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    gap: 10px !important;
+  }
+
+  .statistics-controls button {
+    width: 100% !important;
+  }
+
+  .security-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .security-panel {
+    padding: 14px !important;
+    border-radius: 16px !important;
+  }
+}

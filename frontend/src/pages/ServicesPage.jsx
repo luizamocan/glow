@@ -185,12 +185,12 @@ export default function ServicesPage({ onNavigate, onLogout, setServices: setGlo
           </div>
         </div>
 
-        <div style={s.sectionRow}>
+        <div style={s.sectionRow} className="services-section-row">
           <div style={s.sectionTitle}>Services Management</div>
           <button style={s.addBtn} onClick={() => setShowAdd(true)}>＋ Add Service</button>
         </div>
 
-        <div style={s.tableCard}>
+        <div style={s.tableCard} className="responsive-table-card">
           <div style={s.tableTop}>
             <span style={s.tableLabel}>Services</span>
             <input

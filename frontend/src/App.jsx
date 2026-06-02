@@ -4,6 +4,7 @@ import ServicesPage from "./pages/ServicesPage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import StatisticsPage from "./pages/StatisticsPage";
+import AdminAppointmentsPage from "./pages/AdminAppointmentsPage";
 import ClientDashboard from "./pages/ClientDashboard";
 import { trackPageVisit, saveLastUser, incrementVisitCount } from "./cookies";
 import BookAGlow from "./pages/BookAGlow"; 
@@ -266,16 +267,17 @@ useEffect(() => {
 
   if (page === "login")       return <LoginPage      onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
   if (page === "signup")      return <SignUpPage     onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
-  if (!currentUser && ["services", "statistics", "security", "client-home", "book", "history", "profile"].includes(page)) {
+  if (!currentUser && ["services", "appointments", "statistics", "security", "client-home", "book", "history", "profile"].includes(page)) {
     return <LoginPage onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
   }
-  if (["services", "statistics", "security"].includes(page) && !isAdmin) {
+  if (["services", "appointments", "statistics", "security"].includes(page) && !isAdmin) {
     return withChat(<ClientDashboard onNavigate={navigate} user={currentUser} services={services} onLogout={handleLogout} />);
   }
   if (["client-home", "book", "history", "profile"].includes(page) && !isClient && currentUser) {
     return withChat(<ServicesPage onNavigate={navigate} services={services} setServices={setServices} onLogout={handleLogout} user={currentUser} />);
   }
   if (page === "services")    return withChat(<ServicesPage   onNavigate={navigate} services={services} setServices={setServices} onLogout={handleLogout} user={currentUser} />);
+  if (page === "appointments") return withChat(<AdminAppointmentsPage onNavigate={navigate} onLogout={handleLogout} user={currentUser} />);
   if (page === "statistics")  return withChat(<StatisticsPage onNavigate={navigate} services={services} onLogout={handleLogout} user={currentUser} />);
   if (page === "security")  return withChat(<SecurityLogsPage onNavigate={navigate} onLogout={handleLogout} user={currentUser} />);
   if (page === "client-home") return withChat(<ClientDashboard onNavigate={navigate} user={currentUser} services={services} onLogout={handleLogout} />);

@@ -2,6 +2,11 @@ const request = require("supertest");
 const app     = require("../src/app");
 const store   = require("../src/data/store");
 const { Service, sequelize } = require("../src/models");
+const emailService = require("../src/services/emailService");
+
+jest.mock("../src/services/emailService", () => ({
+  sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
+}));
 
 let adminAuth;
 let clientAuth;
@@ -446,15 +451,21 @@ describe("DB-backed authentication", () => {
   });
 
   test("resets password with a generated recovery token", async () => {
+    let sentToken;
+    emailService.sendPasswordResetEmail.mockImplementationOnce(async ({ token }) => {
+      sentToken = token;
+    });
+
     const forgot = await request(app).post("/api/auth/forgot-password").send({
       email: "client@glowandshine.com",
     });
 
     expect(forgot.status).toBe(200);
-    expect(forgot.body.resetToken).toBeDefined();
+    expect(forgot.body.resetToken).toBeUndefined();
+    expect(sentToken).toBeDefined();
 
     const reset = await request(app).post("/api/auth/reset-password").send({
-      token: forgot.body.resetToken,
+      token: sentToken,
       password: "Client@456",
     });
     expect(reset.status).toBe(200);

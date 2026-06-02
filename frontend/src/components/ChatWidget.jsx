@@ -155,7 +155,7 @@ export default function ChatWidget({ user }) {
   return (
     <>
       {open && (
-        <section style={s.panel} aria-label="Real-time chat">
+        <section style={s.panel} className="chat-panel" aria-label="Real-time chat">
           <div style={s.header}>
             <span>Glow Chat</span>
             <button style={s.close} onClick={() => setOpen(false)} aria-label="Close chat">x</button>
@@ -185,7 +185,7 @@ export default function ChatWidget({ user }) {
           </div>
         </section>
       )}
-      <button style={s.launcher} onClick={() => setOpen((value) => !value)} aria-label="Open chat">Chat</button>
+      <button style={s.launcher} className="chat-launcher" onClick={() => setOpen((value) => !value)} aria-label="Open chat">Chat</button>
     </>
   );
 }

@@ -6,6 +6,7 @@ const { authenticateToken } = require("../middleware/authMiddleware");
 router.use(authenticateToken);
 router.get("/", ctrl.getAppointments);
 router.post("/", ctrl.createAppointment);
+router.put("/:id/status", ctrl.updateAppointmentStatus);
 router.delete("/:id", ctrl.cancelAppointment);
 
 module.exports = router;

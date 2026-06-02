@@ -6,6 +6,7 @@ const {
   verifyPassword,
 } = require("../services/authService");
 const { verifyGoogleCredential } = require("../services/googleAuthService");
+const { sendPasswordResetEmail } = require("../services/emailService");
 const { createResetToken, consumeResetToken } = require("../services/recoveryService");
 
 const isStrongPassword = (password) =>
@@ -134,11 +135,12 @@ const forgotPassword = async (req, res) => {
     const user = await userStore.getByEmail(email);
     if (user) {
       const reset = createResetToken(email);
-      return res.json({
-        message: "If the email exists, a reset code was generated.",
-        resetToken: reset.token,
-        expiresAt: reset.expiresAt,
-      });
+      try {
+        await sendPasswordResetEmail({ to: email, token: reset.token });
+      } catch (error) {
+        console.error("Password recovery email failed:", error.message);
+        return res.status(500).json({ error: "Password recovery email could not be sent" });
+      }
     }
   }
   res.json({ message: "If the email exists, a reset code was generated." });
